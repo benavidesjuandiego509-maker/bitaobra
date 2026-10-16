@@ -1803,36 +1803,72 @@ function dlgConfirm(msg, label, fn) {
 IC.mic = SVG('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/>');
 IC.micOff = SVG('<rect x="8" y="8" width="8" height="8" rx="1.5"/>');
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-let dict = null; // dictado en curso: { rec, btn, field }
-function stopDictado() { if (dict) { try { dict.rec.stop(); } catch (e) {} } }
-function startDictado(btn, field) {
-  if (!SR) return toast("Este navegador no permite dictar. Use Chrome, Edge o Safari, o el micrófono del teclado del celular.");
-  if (dict) { const same = dict.field === field; stopDictado(); if (same) return; }
+const IS_IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+const IS_STANDALONE = navigator.standalone === true || matchMedia("(display-mode: standalone)").matches;
+// Dictado robusto para celular: cada sesión de reconocimiento es corta (continuous = false), porque en Chrome
+// para Android el modo continuo repite o pierde resultados y se corta solo. Mientras el botón siga activo,
+// al terminar una frase se abre otra sesión, y lo reconocido se agrega al campo.
+let dict = null; // { btn, field, rec, base, activo, lang, huboTexto, errores }
+function stopDictado(msg) {
+  if (!dict) return;
+  const d = dict; dict = null; d.activo = false;
+  try { d.rec && d.rec.abort(); } catch (e) {}
+  micUI(d.btn, false);
+  if (msg) toast(msg);
+}
+function micUI(btn, on) {
+  btn.classList.toggle("rec", on); btn.innerHTML = on ? IC.micOff : IC.mic;
+  btn.setAttribute("aria-label", on ? "Detener dictado" : "Dictar por voz"); btn.setAttribute("aria-pressed", on ? "true" : "false");
+}
+function escribir(field, texto) {
+  field.value = texto;
+  if (field.tagName === "TEXTAREA") field.scrollTop = field.scrollHeight;
+  field.dispatchEvent(new Event("input", { bubbles: true })); field.dispatchEvent(new Event("change", { bubbles: true }));
+}
+function unir(base, t) { t = t.trim(); if (!t) return base; if (!base.trim() || /[.!?]\s*$/.test(base)) t = t[0].toUpperCase() + t.slice(1); return base.trim() ? base.replace(/\s*$/, " ") + t : t; }
+function sesionDictado(d) {
   const rec = new SR();
-  rec.lang = "es-CO"; rec.interimResults = true; rec.continuous = true;
-  const base = field.value ? field.value.replace(/\s*$/, " ") : "";
-  let finals = "";
-  dict = { rec, btn, field };
-  btn.classList.add("rec"); btn.innerHTML = IC.micOff; btn.setAttribute("aria-label", "Detener dictado"); btn.setAttribute("aria-pressed", "true");
+  rec.lang = d.lang; rec.continuous = false; rec.interimResults = true; rec.maxAlternatives = 1;
+  d.rec = rec;
+  let frase = "";
   rec.onresult = ev => {
-    let interim = "";
-    for (let i = ev.resultIndex; i < ev.results.length; i++) {
-      const t = ev.results[i][0].transcript;
-      if (ev.results[i].isFinal) finals += (finals && !/\s$/.test(finals) ? " " : "") + t.trim(); else interim += t;
-    }
-    let txt = (finals + (interim ? " " + interim.trim() : "")).trim();
-    if (txt && !base && field.tagName === "TEXTAREA") txt = txt[0].toUpperCase() + txt.slice(1);
-    field.value = base + txt;
-    if (field.tagName === "TEXTAREA") field.scrollTop = field.scrollHeight;
-    field.dispatchEvent(new Event("input", { bubbles: true }));
+    // Se reconstruye la frase con todos los resultados de la sesión (evita duplicados en Android).
+    let t = "";
+    for (let i = 0; i < ev.results.length; i++) { const r = ev.results[i][0].transcript; t = r.startsWith(t) ? r : (t + " " + r); }
+    frase = t.trim();
+    if (dict === d) escribir(d.field, unir(d.base, frase));
   };
   rec.onerror = ev => {
-    if (ev.error === "not-allowed" || ev.error === "service-not-allowed") toast("No hay permiso para usar el micrófono. Actívelo en el navegador o use el micrófono del teclado.");
-    else if (ev.error === "no-speech") toast("No se escuchó nada. Toque el micrófono y hable de nuevo.");
-    else if (ev.error !== "aborted") toast("No se pudo dictar en este momento (" + ev.error + ").");
+    if (dict !== d) return;
+    const e = ev.error;
+    if (e === "no-speech" || e === "aborted") return; // se reintenta en onend
+    if (e === "language-not-supported" && d.lang !== "es-ES") { d.lang = "es-ES"; return; }
+    const msgs = {
+      "not-allowed": "El navegador no dio permiso para usar el micrófono. Permítalo en la configuración del sitio (candado junto a la dirección) e intente de nuevo.",
+      "service-not-allowed": IS_IOS ? "En iPhone el dictado no funciona dentro de la app instalada. Ábrala en Safari o use el micrófono del teclado." : "Este navegador no permite el servicio de dictado. Use Chrome o el micrófono del teclado.",
+      "audio-capture": "No se encontró un micrófono disponible. Cierre otras apps que lo estén usando e intente de nuevo.",
+      "network": "El dictado necesita internet. Revise la conexión o use el micrófono del teclado."
+    };
+    stopDictado(msgs[e] || "No se pudo dictar (" + e + "). Use el micrófono del teclado del celular.");
   };
-  rec.onend = () => { btn.classList.remove("rec"); btn.innerHTML = IC.mic; btn.setAttribute("aria-label", "Dictar por voz"); btn.setAttribute("aria-pressed", "false"); if (dict && dict.rec === rec) dict = null; };
-  try { rec.start(); toast("Escuchando… hable y el texto se irá escribiendo."); } catch (e) { rec.onend(); toast("No se pudo iniciar el micrófono."); }
+  rec.onend = () => {
+    if (dict !== d) return;
+    if (frase) { d.base = unir(d.base, frase); escribir(d.field, d.base); d.huboTexto = true; d.vacias = 0; }
+    else d.vacias = (d.vacias || 0) + 1;
+    if (d.vacias >= 3) return stopDictado(d.huboTexto ? "Dictado terminado." : "No se escuchó nada. Hable cerca del micrófono y vuelva a tocar el botón.");
+    try { sesionDictado(d); } catch (e) { stopDictado("Dictado terminado."); }
+  };
+  rec.start();
+}
+function startDictado(btn, field) {
+  if (dict) { const same = dict.field === field; stopDictado(same ? "Dictado terminado." : ""); if (same) return; }
+  if (!SR) return toast("Este navegador no permite dictar. Use Chrome o Safari, o el micrófono del teclado del celular.");
+  if (IS_IOS && IS_STANDALONE) return toast("En iPhone el dictado no funciona dentro de la app instalada. Ábrala en Safari o use el micrófono del teclado.");
+  if (!window.isSecureContext) return toast("El dictado solo funciona si la app se abre con https.");
+  const d = { btn, field, base: field.value || "", activo: true, lang: "es-CO", huboTexto: false, vacias: 0 };
+  dict = d; micUI(btn, true);
+  try { sesionDictado(d); toast("Escuchando… hable y el texto se irá escribiendo. Toque de nuevo para terminar."); }
+  catch (e) { stopDictado("No se pudo iniciar el micrófono. Use el micrófono del teclado del celular."); }
 }
 function addMics(root) {
   root.querySelectorAll("textarea, input:not([type]), input[type=text]").forEach(field => {
@@ -1843,6 +1879,7 @@ function addMics(root) {
     const btn = document.createElement("button");
     btn.type = "button"; btn.className = "mic"; btn.innerHTML = IC.mic; btn.title = "Dictar por voz";
     btn.setAttribute("aria-label", "Dictar por voz"); btn.setAttribute("aria-pressed", "false");
+    btn.addEventListener("mousedown", ev => ev.preventDefault());
     btn.addEventListener("click", ev => { ev.preventDefault(); ev.stopPropagation(); startDictado(btn, field); });
     wrap.appendChild(btn);
   });
