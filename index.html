@@ -361,6 +361,19 @@ button.citem:active { transform: scale(0.99); }
 .report h3 { margin-top: 6px; }
 .report .entry { break-inside: avoid; }
 
+
+/* ---------- dictado por voz ---------- */
+.mic-wrap { position: relative; display: block; min-width: 0; }
+.mic-wrap > input, .mic-wrap > textarea { padding-right: 46px; }
+.mic { position: absolute; right: 6px; top: 6px; width: 34px; height: 34px; border-radius: 50%; border: 0; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; cursor: pointer; transition: background 0.15s, color 0.15s, transform 0.1s; }
+.mic-wrap > input + .mic { top: 50%; margin-top: -17px; }
+.mic svg.i { width: 18px; height: 18px; }
+.mic:hover { filter: brightness(0.96); }
+.mic:active { transform: scale(0.92); }
+.mic.rec { background: var(--bad); color: #fff; animation: micPulse 1.2s ease-in-out infinite; }
+@keyframes micPulse { 0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--bad) 45%, transparent); } 50% { box-shadow: 0 0 0 8px transparent; } }
+.mic-hint { font-size: 0.75rem; color: var(--bad); font-weight: 600; }
+
 /* ---------- celular: navegación inferior y hojas ---------- */
 @media (max-width: 720px) {
   :root { --nav-h: 64px; }
@@ -433,7 +446,7 @@ button.citem:active { transform: scale(0.99); }
 <form id="gateForm" style="background:#fff;padding:24px;border-radius:12px;box-shadow:0 2px 12px #0002;width:min(320px,90vw);display:grid;gap:12px">
 <img src="icon.svg" alt="" style="width:64px;justify-self:center">
 <h2 style="margin:0;text-align:center;color:#1f4f8f">BitaObra</h2>
-<input id="gateUser" placeholder="Usuario" autocomplete="username" required style="padding:10px;font-size:16px">
+<input id="gateUser" data-mic="no" placeholder="Usuario" autocomplete="username" required style="padding:10px;font-size:16px">
 <input id="gatePass" type="password" placeholder="Contraseña" autocomplete="current-password" required style="padding:10px;font-size:16px">
 <button style="padding:10px;font-size:16px;background:#1f4f8f;color:#fff;border:0;border-radius:8px">Ingresar</button>
 <p id="gateErr" hidden style="margin:0;color:#b00020;text-align:center">Usuario o contraseña incorrectos</p>
@@ -1528,11 +1541,12 @@ function openDialog(html, onMount, opts = {}) {
   back.addEventListener("click", ev => { if (ev.target === back) closeDialog(); });
   back.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click", closeDialog));
   onMount && onMount(back);
+  addMics(back);
   document.body.style.overflow = "hidden";
   const first = back.querySelector(".dialog input:not([type=file]),.dialog textarea,.dialog select");
   if (first && matchMedia("(pointer: fine)").matches) first.focus(); else back.querySelector(".x").focus({ preventScroll: true });
 }
-function closeDialog() { $("#layer").innerHTML = ""; document.body.style.overflow = ""; }
+function closeDialog() { stopDictado(); $("#layer").innerHTML = ""; document.body.style.overflow = ""; }
 document.addEventListener("keydown", e => { if (e.key === "Escape") closeDialog(); });
 
 function signaturePad(canvas) {
@@ -1766,8 +1780,59 @@ function dlgConfirm(msg, label, fn) {
 }
 
 /* ---------- eventos ---------- */
+
+/* ---------- dictado por voz: un micrófono en cada campo donde se escribe ---------- */
+IC.mic = SVG('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/>');
+IC.micOff = SVG('<rect x="8" y="8" width="8" height="8" rx="1.5"/>');
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let dict = null; // dictado en curso: { rec, btn, field }
+function stopDictado() { if (dict) { try { dict.rec.stop(); } catch (e) {} } }
+function startDictado(btn, field) {
+  if (!SR) return toast("Este navegador no permite dictar. Use Chrome, Edge o Safari, o el micrófono del teclado del celular.");
+  if (dict) { const same = dict.field === field; stopDictado(); if (same) return; }
+  const rec = new SR();
+  rec.lang = "es-CO"; rec.interimResults = true; rec.continuous = true;
+  const base = field.value ? field.value.replace(/\s*$/, " ") : "";
+  let finals = "";
+  dict = { rec, btn, field };
+  btn.classList.add("rec"); btn.innerHTML = IC.micOff; btn.setAttribute("aria-label", "Detener dictado"); btn.setAttribute("aria-pressed", "true");
+  rec.onresult = ev => {
+    let interim = "";
+    for (let i = ev.resultIndex; i < ev.results.length; i++) {
+      const t = ev.results[i][0].transcript;
+      if (ev.results[i].isFinal) finals += (finals && !/\s$/.test(finals) ? " " : "") + t.trim(); else interim += t;
+    }
+    let txt = (finals + (interim ? " " + interim.trim() : "")).trim();
+    if (txt && !base && field.tagName === "TEXTAREA") txt = txt[0].toUpperCase() + txt.slice(1);
+    field.value = base + txt;
+    if (field.tagName === "TEXTAREA") field.scrollTop = field.scrollHeight;
+    field.dispatchEvent(new Event("input", { bubbles: true }));
+  };
+  rec.onerror = ev => {
+    if (ev.error === "not-allowed" || ev.error === "service-not-allowed") toast("No hay permiso para usar el micrófono. Actívelo en el navegador o use el micrófono del teclado.");
+    else if (ev.error === "no-speech") toast("No se escuchó nada. Toque el micrófono y hable de nuevo.");
+    else if (ev.error !== "aborted") toast("No se pudo dictar en este momento (" + ev.error + ").");
+  };
+  rec.onend = () => { btn.classList.remove("rec"); btn.innerHTML = IC.mic; btn.setAttribute("aria-label", "Dictar por voz"); btn.setAttribute("aria-pressed", "false"); if (dict && dict.rec === rec) dict = null; };
+  try { rec.start(); toast("Escuchando… hable y el texto se irá escribiendo."); } catch (e) { rec.onend(); toast("No se pudo iniciar el micrófono."); }
+}
+function addMics(root) {
+  root.querySelectorAll("textarea, input:not([type]), input[type=text]").forEach(field => {
+    if (field.dataset.mic || field.disabled || field.readOnly) return;
+    field.dataset.mic = "1";
+    const wrap = document.createElement("span"); wrap.className = "mic-wrap";
+    field.parentNode.insertBefore(wrap, field); wrap.appendChild(field);
+    const btn = document.createElement("button");
+    btn.type = "button"; btn.className = "mic"; btn.innerHTML = IC.mic; btn.title = "Dictar por voz";
+    btn.setAttribute("aria-label", "Dictar por voz"); btn.setAttribute("aria-pressed", "false");
+    btn.addEventListener("click", ev => { ev.preventDefault(); ev.stopPropagation(); startDictado(btn, field); });
+    wrap.appendChild(btn);
+  });
+}
+
 function bindView(p) {
   const v = $("#view");
+  stopDictado(); addMics(v);
   v.querySelectorAll("[data-go]").forEach(b => b.onclick = () => setTab(b.dataset.go));
   v.querySelectorAll("[data-check]").forEach(c => c.onchange = () => { p.acta.checks[c.dataset.check] = c.checked; save(); render(); });
   v.querySelectorAll("[data-sign-acta]").forEach(b => b.onclick = () => dlgSignActa(p, b.dataset.signActa));
