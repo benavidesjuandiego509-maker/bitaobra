@@ -641,23 +641,91 @@ const SEVERIDAD = { critica: "Crítica", mayor: "Mayor", menor: "Menor" };
 const normReq = t => String(t || "").toLowerCase().replace(/\s+/g, " ").trim();
 
 /* ---------- estado y persistencia ---------- */
+// Los datos se guardan en IndexedDB, que admite cientos de megas en el celular, para que no haya límite práctico de fotos.
+// Las fotos van en un almacén aparte ("fotos") y el resto del proyecto en "kv". Si IndexedDB no está disponible,
+// se usa localStorage (unos 5 MB) y se avisa cuando se llena.
 const KEY = "bitaobra.v1";
 let state = null;
 let storageOk = true;
-function load() {
+let idbOk = !!window.indexedDB;
+const FOTOS = new Set(); // ids de fotos ya guardadas en IndexedDB
+let _db = null;
+function openDB() {
+  return _db || (_db = new Promise((res, rej) => {
+    const r = indexedDB.open("bitaobra", 1);
+    r.onupgradeneeded = () => { r.result.createObjectStore("kv"); r.result.createObjectStore("fotos"); };
+    r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); r.onblocked = () => rej(new Error("blocked"));
+  }));
+}
+function idb(store, mode, fn) {
+  return openDB().then(db => new Promise((res, rej) => {
+    const tx = db.transaction(store, mode), req = fn(tx.objectStore(store));
+    tx.oncomplete = () => res(req && req.result); tx.onerror = () => rej(tx.error); tx.onabort = () => rej(tx.error);
+  }));
+}
+// Copia del estado sin las imágenes de las fotos (que viajan por separado).
+const sinFotos = () => JSON.stringify(state, function (k, v) { return k === "img" && this && this.id && FOTOS.has(this.id) ? undefined : v; });
+function cadaFoto(fn) { state.projects.forEach(p => p.asientos.forEach(e => (e.evidencias || []).forEach(v => fn(v)))); }
+async function load() {
+  if (idbOk) {
+    try {
+      const raw = await idb("kv", "readonly", st => st.get("state"));
+      if (raw) {
+        const s = JSON.parse(raw);
+        const [keys, vals] = await Promise.all([idb("fotos", "readonly", st => st.getAllKeys()), idb("fotos", "readonly", st => st.getAll())]);
+        const m = new Map(keys.map((k, i) => [k, vals[i]]));
+        s.projects.forEach(p => p.asientos.forEach(e => (e.evidencias || []).forEach(v => { if (v.id && m.has(v.id)) { v.img = m.get(v.id); FOTOS.add(v.id); } })));
+        return s;
+      }
+    } catch (e) { idbOk = false; }
+  }
+  // Primera vez con esta versión: se toman los datos que estaban en localStorage y se pasan a IndexedDB al guardar.
   try { const raw = localStorage.getItem(KEY); if (raw) return JSON.parse(raw); } catch (e) { storageOk = false; }
   return null;
 }
-function save() {
+let _saving = Promise.resolve(), _avisoEspacio = false;
+function save() { _saving = _saving.then(saveNow, saveNow); return _saving; }
+async function saveNow() {
+  if (idbOk) {
+    try {
+      const nuevas = [];
+      cadaFoto(v => { if (!v.id) v.id = uid() + uid(); if (v.img && !FOTOS.has(v.id)) nuevas.push(v); });
+      if (nuevas.length) await idb("fotos", "readwrite", st => { nuevas.forEach(v => st.put(v.img, v.id)); });
+      nuevas.forEach(v => FOTOS.add(v.id));
+      // Fotos de proyectos eliminados: se borran del almacén.
+      const vivas = new Set(); cadaFoto(v => vivas.add(v.id));
+      const huerfanas = [...FOTOS].filter(id => !vivas.has(id));
+      if (huerfanas.length) { await idb("fotos", "readwrite", st => { huerfanas.forEach(id => st.delete(id)); }); huerfanas.forEach(id => FOTOS.delete(id)); }
+      await idb("kv", "readwrite", st => st.put(sinFotos(), "state"));
+      try { localStorage.removeItem(KEY); } catch (e) {}
+      storageOk = true;
+      espacio();
+      return;
+    } catch (e) {
+      if (e && e.name === "QuotaExceededError") return toast("El celular se quedó sin espacio para guardar. Libere espacio (fotos, apps) y vuelva a intentar; no se perdió lo ya guardado.");
+      idbOk = false;
+    }
+  }
   try { localStorage.setItem(KEY, JSON.stringify(state)); }
-  catch (e) { storageOk = false; toast("No se pudo guardar en este dispositivo. Libere espacio o quite evidencias pesadas."); }
+  catch (e) { storageOk = false; toast("Este navegador solo permite guardar unos 5 MB y ya se llenaron. Abra la aplicación en Chrome o Safari para guardar fotos sin límite."); }
+}
+// Aviso (sin bloquear) cuando el espacio del dispositivo está casi lleno; además se pide que el navegador no borre los datos.
+async function espacio() {
+  try {
+    if (navigator.storage && navigator.storage.persist && !espacio.pedido) { espacio.pedido = true; navigator.storage.persist().catch(() => {}); }
+    if (_avisoEspacio || !navigator.storage || !navigator.storage.estimate) return;
+    const { usage, quota } = await navigator.storage.estimate();
+    if (quota && usage / quota > 0.9) { _avisoEspacio = true; toast("El espacio para guardar está casi lleno. Exporte un respaldo y libere espacio en el celular."); }
+  } catch (e) {}
 }
 const P = () => state.projects.find(p => p.id === state.current);
 
 /* ---------- integridad: cadena de hashes ---------- */
+const _shaImg = new Map();
+const shaImg = img => { let h = _shaImg.get(img); if (!h) { h = sha256(img); _shaImg.set(img, h); } return h; };
 function entryPayload(e) {
   return JSON.stringify([e.folio, e.tipo, e.fechaHechos, e.registradoAt, e.autorRol, e.autorNombre, e.clima, e.personal, e.equipos, e.actividades, e.texto,
-    (e.evidencias || []).map(v => [v.at, v.lat, v.lon, sha256(v.img || "")]), e.solicitud ? [e.solicitud.categoria, e.solicitud.venceAt] : null, e.refFolio || null, e.firma ? [e.firma.nombre, e.firma.at, sha256(e.firma.img || "")] : null]
+    (e.evidencias || []).map(v => [v.at, v.lat, v.lon, shaImg(v.img || "")]), e.solicitud ? [e.solicitud.categoria, e.solicitud.venceAt] : null, e.refFolio || null, e.firma ? [e.firma.nombre, e.firma.at, sha256(e.firma.img || "")] : null]
     .concat(e.nc ? [[e.nc.requisito, e.nc.severidad, e.nc.plazo, e.nc.venceAt]] : [])
     .concat(e.eficaz != null ? [e.eficaz] : []));
 }
@@ -1653,15 +1721,16 @@ function dlgEntry(p, tipo, refFolio = null) {
     const addFiles = async ev => {
       $("#ef-thumbs", root).innerHTML = `<span class="small muted">Procesando fotos…</span>`;
       const pos = await getPosition();
-      for (const file of ev.target.files) {
-        try { const img = await readImage(file); evid.push({ img, at: Date.now(), lat: pos?.lat ?? null, lon: pos?.lon ?? null, nombre: file.name }); }
+      const files = [...ev.target.files]; ev.target.value = "";
+      for (const [i, file] of files.entries()) {
+        if (files.length > 1) $("#ef-thumbs", root).innerHTML = `<span class="small muted">Procesando foto ${i + 1} de ${files.length}…</span>`;
+        try { const img = await readImage(file); evid.push({ id: uid() + uid(), img, at: Date.now(), lat: pos?.lat ?? null, lon: pos?.lon ?? null, nombre: file.name }); }
         catch (e) { toast("No se pudo leer " + file.name); }
       }
       drawThumbs();
-      ev.target.value = "";
     };
     const drawThumbs = () => {
-      $("#ef-thumbs", root).innerHTML = evid.map((v, i) => `<figure class="thumb"><img src="${v.img}" alt="Foto ${i + 1}"><button type="button" class="rm" data-rm="${i}" aria-label="Quitar foto ${i + 1}">✕</button><figcaption>${v.lat != null ? "Con ubicación" : "Sin ubicación"}</figcaption></figure>`).join("");
+      $("#ef-thumbs", root).innerHTML = (evid.length ? `<span class="small muted" style="flex-basis:100%">${evid.length} ${evid.length === 1 ? "foto" : "fotos"} · sin límite</span>` : "") + evid.map((v, i) => `<figure class="thumb"><img src="${v.img}" alt="Foto ${i + 1}"><button type="button" class="rm" data-rm="${i}" aria-label="Quitar foto ${i + 1}">✕</button><figcaption>${v.lat != null ? "Con ubicación" : "Sin ubicación"}</figcaption></figure>`).join("");
       $("#ef-thumbs", root).querySelectorAll("[data-rm]").forEach(b => b.onclick = () => { evid.splice(+b.dataset.rm, 1); drawThumbs(); });
     };
     $("#ef-files", root).addEventListener("change", addFiles);
@@ -1946,18 +2015,20 @@ $("#themeBtn").addEventListener("click", () => { const dark = state.theme ? stat
 $("#projSel").addEventListener("change", e => { if (e.target.value === "__new") { e.target.value = state.current; return dlgNewProject(); } state.current = e.target.value; save(); render(); });
 
 /* ---------- arranque ---------- */
-state = load();
-if (!state || !state.projects || !state.projects.length) { state = freshState(); save(); }
-else {
-  // Datos guardados por la versión anterior: el ejemplo se regenera y los proyectos propios reciben los campos nuevos.
-  state.projects = state.projects.map(x => x.ejemplo && x.version !== 3 ? buildSample() : x);
-  state.projects.forEach(x => { x.plazosNC = x.plazosNC || { critica: 1, mayor: 5, menor: 10 }; x.mejoras = x.mejoras || []; });
-  if (!state.projects.some(x => x.id === state.current)) state.current = state.projects[0].id;
+(async () => {
+  state = await load();
+  if (!state || !state.projects || !state.projects.length) { state = freshState(); }
+  else {
+    // Datos guardados por la versión anterior: el ejemplo se regenera y los proyectos propios reciben los campos nuevos.
+    state.projects = state.projects.map(x => x.ejemplo && x.version !== 3 ? buildSample() : x);
+    state.projects.forEach(x => { x.plazosNC = x.plazosNC || { critica: 1, mayor: 5, menor: 10 }; x.mejoras = x.mejoras || []; });
+    if (!state.projects.some(x => x.id === state.current)) state.current = state.projects[0].id;
+  }
+  state.role = "interventor"; // la aplicación es de uso exclusivo de la interventoría
   save();
-}
-state.role = "interventor"; // la aplicación es de uso exclusivo de la interventoría
-applyTheme();
-render();
+  applyTheme();
+  render();
+})();
 if (!framed && "serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 

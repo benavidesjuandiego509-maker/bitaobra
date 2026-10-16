@@ -1,5 +1,5 @@
 // Service worker: guarda la aplicación para que abra sin conexión en el frente de obra.
-const CACHE = "bitaobra-v11";
+const CACHE = "bitaobra-v12";
 const FILES = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg", "./vendor/jspdf.umd.min.js"];
 self.addEventListener("install", e => e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES.map(f => new Request(f, { cache: "reload" })))).then(() => self.skipWaiting())));
 self.addEventListener("activate", e => e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())));
