@@ -1,0 +1,1410 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1f4f8f">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>BitaObra</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Concepto: libro de obra foliado sobre papel de plano; tinta azul de interventoría, semáforo solo para estados. */
+:root {
+  --bg: #eef1f3;
+  --paper: #ffffff;
+  --ink: #18222b;
+  --muted: #5b6875;
+  --line: #d3dae0;
+  --accent: #1f4f8f;
+  --accent-ink: #ffffff;
+  --accent-soft: #e3ecf7;
+  --ok: #1d7a46;
+  --ok-soft: #e1f2e8;
+  --warn: #9a6400;
+  --warn-soft: #fbefd6;
+  --bad: #b3261e;
+  --bad-soft: #f9e2e0;
+  --idle: #6b7680;
+  --idle-soft: #e8ecef;
+  --font-display: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r: 6px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11171c; --paper: #182128; --ink: #e4eaef; --muted: #9aa8b4; --line: #2c3842;
+    --accent: #7fb0ec; --accent-ink: #0d1620; --accent-soft: #1d3149;
+    --ok: #6fd19a; --ok-soft: #173326; --warn: #f0bf5a; --warn-soft: #3a2d12;
+    --bad: #f28b82; --bad-soft: #3d1c1a; --idle: #9aa8b4; --idle-soft: #232e36;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11171c; --paper: #182128; --ink: #e4eaef; --muted: #9aa8b4; --line: #2c3842;
+  --accent: #7fb0ec; --accent-ink: #0d1620; --accent-soft: #1d3149;
+  --ok: #6fd19a; --ok-soft: #173326; --warn: #f0bf5a; --warn-soft: #3a2d12;
+  --bad: #f28b82; --bad-soft: #3d1c1a; --idle: #9aa8b4; --idle-soft: #232e36;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.5; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--paper); }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; line-height: 1.15; text-wrap: balance; margin: 0; }
+h2 { font-size: 1.6rem; }
+h3 { font-size: 1.2rem; }
+p { margin: 0; }
+.mono { font-family: var(--font-mono); font-size: 0.82em; }
+.muted { color: var(--muted); }
+.small { font-size: 0.85rem; }
+.label { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+
+header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--paper); border-bottom: 1px solid var(--line); }
+.top-inner { max-width: 1040px; margin: 0 auto; padding-block: 10px 0; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+.brand-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; justify-content: space-between; }
+.brand { display: flex; align-items: baseline; gap: 10px; min-width: 0; flex: 1 1 260px; }
+.brand h1 { flex: none; }
+.brand h1 { font-size: 1.7rem; letter-spacing: 0.01em; }
+.brand h1 b { color: var(--accent); font-weight: 700; }
+.brand .proj { color: var(--muted); font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; min-width: 0; max-width: 100%; }
+.controls select { max-width: 100%; }
+#projSel { max-width: 14rem; }
+nav.tabs { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; }
+nav.tabs button { border: 0; background: none; color: var(--muted); font: 600 0.95rem var(--font-body); padding: 8px 12px 10px; border-bottom: 3px solid transparent; cursor: pointer; white-space: nowrap; }
+nav.tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+nav.tabs button .count { font-family: var(--font-mono); font-size: 0.75rem; margin-left: 4px; padding: 0 5px; border-radius: 9px; background: var(--bad-soft); color: var(--bad); }
+
+main { max-width: 1040px; margin: 0 auto; padding-block: 20px 60px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
+.panel { background: var(--paper); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; display: grid; gap: 14px; min-width: 0; }
+.panel-head { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: baseline; justify-content: space-between; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+.grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.example-banner { background: var(--warn-soft); color: var(--ink); border: 1px dashed var(--warn); border-radius: var(--r); padding: 10px 14px; font-size: 0.9rem; }
+
+label.field { display: grid; gap: 4px; font-size: 0.85rem; font-weight: 500; min-width: 0; }
+input, select, textarea { font: inherit; color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 8px 10px; width: 100%; min-width: 0; }
+textarea { min-height: 84px; resize: vertical; }
+input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.btn { font: 600 0.92rem var(--font-body); border-radius: 4px; padding: 8px 14px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn.small { padding: 5px 10px; font-size: 0.82rem; }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.role-select { width: auto; font-weight: 600; }
+
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.kpi { border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; background: var(--paper); display: grid; gap: 2px; }
+.kpi .v { font-family: var(--font-display); font-size: 2rem; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.kpi .v small { font-size: 1rem; color: var(--muted); font-weight: 500; }
+.kpi.good .v { color: var(--ok); } .kpi.warn .v { color: var(--warn); } .kpi.bad .v { color: var(--bad); }
+.bar { height: 8px; border-radius: 4px; background: var(--idle-soft); overflow: hidden; }
+.bar > span { display: block; height: 100%; background: var(--accent); }
+
+.pill { display: inline-flex; align-items: center; gap: 6px; font-size: 0.78rem; font-weight: 600; padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
+.pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.pill.ok { background: var(--ok-soft); color: var(--ok); }
+.pill.warn { background: var(--warn-soft); color: var(--warn); }
+.pill.bad { background: var(--bad-soft); color: var(--bad); }
+.pill.idle { background: var(--idle-soft); color: var(--idle); }
+.pill.info { background: var(--accent-soft); color: var(--accent); }
+
+.checklist { display: grid; gap: 6px; }
+.check { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; padding: 8px 10px; border: 1px solid var(--line); border-radius: 4px; }
+.check input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--accent); }
+.check.done { background: var(--ok-soft); border-color: transparent; }
+.sigs { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.sig { border: 1px solid var(--line); border-radius: var(--r); padding: 12px; display: grid; gap: 8px; align-content: start; }
+.sig img { background: #fff; border: 1px solid var(--line); border-radius: 4px; height: 70px; width: 100%; object-fit: contain; }
+.pad-wrap { display: grid; gap: 6px; }
+canvas.pad { width: 100%; height: 120px; background: #fff; border: 1px dashed var(--muted); border-radius: 4px; touch-action: none; cursor: crosshair; }
+
+.entries { display: grid; gap: 12px; }
+.entry { border: 1px solid var(--line); border-radius: var(--r); background: var(--paper); display: grid; grid-template-columns: 74px 1fr; min-width: 0; }
+.entry .folio { border-right: 1px solid var(--line); padding: 12px 8px; text-align: center; display: grid; align-content: start; gap: 2px; }
+.entry .folio .n { font-family: var(--font-mono); font-size: 1.1rem; font-weight: 500; }
+.entry .body { padding: 12px 14px; display: grid; gap: 8px; min-width: 0; }
+.entry .meta { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; font-size: 0.85rem; color: var(--muted); }
+.entry .text { white-space: pre-wrap; overflow-wrap: anywhere; }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 4px 14px; font-size: 0.88rem; }
+.facts div span { color: var(--muted); }
+.thumbs { display: flex; flex-wrap: wrap; gap: 8px; }
+.thumb { width: 120px; display: grid; gap: 2px; font-size: 0.7rem; color: var(--muted); }
+.thumb img { width: 120px; height: 90px; object-fit: cover; border-radius: 4px; border: 1px solid var(--line); }
+.hash { font-family: var(--font-mono); font-size: 0.72rem; color: var(--muted); overflow-wrap: anywhere; }
+.entry.t-orden .folio { background: var(--accent-soft); }
+.entry.t-solicitud .folio { background: var(--warn-soft); }
+.entry.t-respuesta .folio { background: var(--ok-soft); }
+
+.table-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+td.num { font-variant-numeric: tabular-nums; text-align: right; font-family: var(--font-mono); font-size: 0.82rem; }
+
+.empty { border: 1px dashed var(--line); border-radius: var(--r); padding: 22px; text-align: center; color: var(--muted); }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 4px; font-size: 0.9rem; z-index: 20; max-width: calc(100% - 32px); }
+.dialog-back { position: fixed; inset: 0; background: rgba(10, 16, 22, 0.55); z-index: 15; display: grid; place-items: center; padding: 16px; }
+.dialog { background: var(--paper); border-radius: var(--r); max-width: 640px; width: 100%; max-height: 90vh; overflow: auto; padding: 18px; display: grid; gap: 12px; }
+.report { font-family: var(--font-body); }
+.report h3 { margin-top: 6px; }
+.report .entry { break-inside: avoid; }
+@media (max-width: 520px) {
+  .entry { grid-template-columns: 1fr; }
+  .entry .folio { border-right: 0; border-bottom: 1px solid var(--line); display: flex; gap: 10px; justify-content: flex-start; align-items: baseline; text-align: left; }
+}
+@media print {
+  header.top, .no-print { display: none !important; }
+  body { background: #fff; color: #000; }
+  .panel { border: 0; padding: 0; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .toast { animation: rise 0.2s ease-out; }
+  @keyframes rise { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translate(-50%, 0); } }
+}
+</style>
+
+</head>
+<body>
+<div id="gate" style="position:fixed;inset:0;z-index:99999;background:#eef1f3;display:flex;align-items:center;justify-content:center;font-family:system-ui,sans-serif">
+<form id="gateForm" style="background:#fff;padding:24px;border-radius:12px;box-shadow:0 2px 12px #0002;width:min(320px,90vw);display:grid;gap:12px">
+<img src="icon.svg" alt="" style="width:64px;justify-self:center">
+<h2 style="margin:0;text-align:center;color:#1f4f8f">BitaObra</h2>
+<input id="gateUser" placeholder="Usuario" autocomplete="username" required style="padding:10px;font-size:16px">
+<input id="gatePass" type="password" placeholder="Contraseña" autocomplete="current-password" required style="padding:10px;font-size:16px">
+<button style="padding:10px;font-size:16px;background:#1f4f8f;color:#fff;border:0;border-radius:8px">Ingresar</button>
+<p id="gateErr" hidden style="margin:0;color:#b00020;text-align:center">Usuario o contraseña incorrectos</p>
+</form></div>
+<script>
+(function(){
+  var H="bda12ff454d6877cd79779252644f31e9cce1358243f0709c67faa733a77c5e8", g=document.getElementById("gate");
+  try { if (localStorage.getItem("bitaobra-gate")===H || !(window.crypto&&crypto.subtle)) { g.remove(); return; } } catch(e) {}
+  document.getElementById("gateForm").addEventListener("submit", async function(ev){
+    ev.preventDefault();
+    var t=document.getElementById("gateUser").value.trim()+":"+document.getElementById("gatePass").value;
+    var d=await crypto.subtle.digest("SHA-256", new TextEncoder().encode(t));
+    var h=Array.from(new Uint8Array(d)).map(function(b){return b.toString(16).padStart(2,"0")}).join("");
+    if (h===H) { try { localStorage.setItem("bitaobra-gate",H); } catch(e) {} g.remove(); }
+    else document.getElementById("gateErr").hidden=false;
+  });
+})();
+</script>
+<header class="top">
+  <div class="top-inner">
+    <div class="brand-row">
+      <div class="brand">
+        <h1>Bita<b>Obra</b></h1>
+        <span class="proj" id="projName"></span>
+      </div>
+      <div class="controls">
+        <label class="small muted" for="roleSel">Actuando como</label>
+        <select id="roleSel" class="role-select">
+          <option value="contratista">Contratista (residente)</option>
+          <option value="interventor">Interventoría</option>
+          <option value="entidad">Entidad contratante</option>
+        </select>
+        <select id="projSel" class="role-select" aria-label="Proyecto"></select>
+      </div>
+    </div>
+    <nav class="tabs" role="tablist" id="tabs">
+      <button role="tab" data-tab="resumen">Resumen</button>
+      <button role="tab" data-tab="acta">Acta de inicio</button>
+      <button role="tab" data-tab="bitacora">Bitácora</button>
+      <button role="tab" data-tab="solicitudes">Solicitudes</button>
+      <button role="tab" data-tab="nc">No conformidades</button>
+      <button role="tab" data-tab="reporte">Reporte</button>
+      <button role="tab" data-tab="proyecto">Proyecto</button>
+    </nav>
+  </div>
+</header>
+<main id="view"></main>
+<div id="layer"></div>
+
+<script src="vendor/jspdf.umd.min.js"></script>
+<script>
+"use strict";
+/* ============================================================
+   BitaObra · prototipo inicial (MVP)
+   Módulos: M1 proyectos y roles · M2 acta de inicio · M3 bitácora
+   M4 evidencias · M5 firmas · M6 reportes · M7 sin conexión (datos
+   locales) · M8 solicitudes con plazo y semáforo · M9 no conformidades
+   y tablero de mejora continua (ciclo PHVA).
+   ============================================================ */
+
+/* ---------- SHA-256 (síncrono, sin dependencias) ---------- */
+function sha256(ascii) {
+  function rr(v, a) { return (v >>> a) | (v << (32 - a)); }
+  const bytes = new TextEncoder().encode(ascii);
+  const K = [], H = [];
+  let p = 0;
+  for (let c = 2; p < 64; c++) {
+    let prime = true;
+    for (let d = 2; d * d <= c; d++) if (c % d === 0) { prime = false; break; }
+    if (prime) {
+      if (p < 8) H[p] = (Math.pow(c, 1 / 2) * 4294967296) | 0;
+      K[p++] = (Math.pow(c, 1 / 3) * 4294967296) | 0;
+    }
+  }
+  const l = bytes.length, bitLen = l * 8;
+  const words = [];
+  for (let i = 0; i < l; i++) words[i >> 2] |= bytes[i] << ((3 - (i % 4)) * 8);
+  words[l >> 2] |= 0x80 << ((3 - (l % 4)) * 8);
+  const total = (((l + 8) >> 6) + 1) * 16;
+  for (let i = words.length; i < total; i++) words[i] = words[i] | 0;
+  words[total - 1] = bitLen;
+  words[total - 2] = Math.floor(bitLen / 4294967296);
+  for (let j = 0; j < total; j += 16) {
+    const w = words.slice(j, j + 16);
+    const old = H.slice(0);
+    let [a, b, c, d, e, f, g, h] = H;
+    for (let i = 0; i < 64; i++) {
+      if (i >= 16) {
+        const w15 = w[i - 15], w2 = w[i - 2];
+        w[i] = (w[i - 16] + (rr(w15, 7) ^ rr(w15, 18) ^ (w15 >>> 3)) + w[i - 7] + (rr(w2, 17) ^ rr(w2, 19) ^ (w2 >>> 10))) | 0;
+      }
+      const t1 = (h + (rr(e, 6) ^ rr(e, 11) ^ rr(e, 25)) + ((e & f) ^ (~e & g)) + K[i] + w[i]) | 0;
+      const t2 = ((rr(a, 2) ^ rr(a, 13) ^ rr(a, 22)) + ((a & b) ^ (a & c) ^ (b & c))) | 0;
+      h = g; g = f; f = e; e = (d + t1) | 0; d = c; c = b; b = a; a = (t1 + t2) | 0;
+    }
+    const nh = [a, b, c, d, e, f, g, h];
+    for (let i = 0; i < 8; i++) H[i] = (nh[i] + old[i]) | 0;
+  }
+  return H.map(x => ("00000000" + (x >>> 0).toString(16)).slice(-8)).join("");
+}
+
+/* ---------- utilidades ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const uid = () => Math.random().toString(36).slice(2, 10);
+const DAY = 86400000;
+const fmtDate = d => new Date(d).toLocaleDateString("es-CO", { day: "2-digit", month: "short", year: "numeric" });
+const fmtDateTime = d => new Date(d).toLocaleString("es-CO", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+const fmtMoney = v => Number(v || 0).toLocaleString("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 });
+const isoDay = d => { const x = new Date(d); return x.getFullYear() + "-" + String(x.getMonth() + 1).padStart(2, "0") + "-" + String(x.getDate()).padStart(2, "0"); };
+const framed = (() => { try { return window.self !== window.top; } catch (e) { return true; } })();
+
+// Festivos de Colombia (Ley 51 de 1983). Devuelve un Set de "AAAA-MM-DD".
+function festivosCO(y) {
+  const a = y % 19, b = Math.floor(y / 100), c = y % 100, d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25),
+    g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30, i = Math.floor(c / 4), k = c % 4,
+    l = (32 + 2 * e + 2 * i - h - k) % 7, m = Math.floor((a + 11 * h + 22 * l) / 451),
+    mes = Math.floor((h + l - 7 * m + 114) / 31), dia = ((h + l - 7 * m + 114) % 31) + 1;
+  const pascua = new Date(y, mes - 1, dia);
+  const mas = (dt, n) => new Date(dt.getFullYear(), dt.getMonth(), dt.getDate() + n);
+  const lunes = dt => { const w = dt.getDay(); return w === 1 ? dt : mas(dt, (8 - w) % 7); };
+  const F = (mm, dd) => new Date(y, mm - 1, dd);
+  return new Set([
+    F(1, 1), F(5, 1), F(7, 20), F(8, 7), F(12, 8), F(12, 25),
+    lunes(F(1, 6)), lunes(F(3, 19)), lunes(F(6, 29)), lunes(F(8, 15)), lunes(F(10, 12)), lunes(F(11, 1)), lunes(F(11, 11)),
+    mas(pascua, -3), mas(pascua, -2), mas(pascua, 43), mas(pascua, 64), mas(pascua, 71)
+  ].map(isoDay));
+}
+const _fest = {};
+// Día hábil: lunes a viernes que no sea festivo nacional.
+function isWeekday(d) {
+  const w = d.getDay(), y = d.getFullYear();
+  if (!_fest[y]) _fest[y] = festivosCO(y);
+  return w !== 0 && w !== 6 && !_fest[y].has(isoDay(d));
+}
+// Suma n días hábiles (lunes a viernes) a una fecha, conservando la hora.
+function addBusinessDays(from, n) {
+  const d = new Date(from);
+  let added = 0;
+  while (added < n) { d.setDate(d.getDate() + 1); if (isWeekday(d)) added++; }
+  return d.getTime();
+}
+// Días hábiles transcurridos entre dos instantes (fraccionarios).
+function businessDaysBetween(a, b) {
+  if (b <= a) return 0;
+  let t = a, total = 0;
+  while (t < b) {
+    const d = new Date(t);
+    const next = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1).getTime();
+    const end = Math.min(next, b);
+    if (isWeekday(d)) total += (end - t) / DAY;
+    t = end;
+  }
+  return total;
+}
+// Percentil por rango más cercano (p entre 0 y 1).
+function percentil(xs, p) { if (!xs.length) return null; const s = [...xs].sort((a, b) => a - b); return s[Math.max(0, Math.ceil(p * s.length) - 1)]; }
+function median(xs) { if (!xs.length) return null; const s = [...xs].sort((a, b) => a - b); const m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; }
+
+/* ---------- catálogos ---------- */
+const ROLES = {
+  contratista: { nombre: "Contratista", campo: "residente" },
+  interventor: { nombre: "Interventoría", campo: "interventor" },
+  entidad: { nombre: "Entidad contratante", campo: "supervisor" }
+};
+const TIPOS = {
+  diario: { nombre: "Registro diario", roles: ["contratista"] },
+  solicitud: { nombre: "Solicitud a interventoría", roles: ["contratista"] },
+  orden: { nombre: "Orden de interventoría", roles: ["interventor"] },
+  visita: { nombre: "Visita de interventoría", roles: ["interventor"] },
+  observacion: { nombre: "Observación", roles: ["contratista", "interventor", "entidad"] },
+  aclaracion: { nombre: "Aclaración de asiento", roles: ["contratista", "interventor", "entidad"] },
+  respuesta: { nombre: "Respuesta a solicitud", roles: [] },
+  noConformidad: { nombre: "No conformidad", roles: ["interventor"] },
+  correccion: { nombre: "Corrección de no conformidad", roles: [] },
+  cierreNC: { nombre: "Verificación de corrección", roles: [] }
+};
+const CATEGORIAS = ["Aprobación de material", "Consulta técnica", "Mayor cantidad de obra", "Obra no prevista", "Prórroga o suspensión", "Aprobación de personal", "Otra"];
+const REQUISITOS = [
+  ["garantia", "Garantía única de cumplimiento aprobada por la entidad", "Ley 80 de 1993, art. 41, mod. Ley 1150 de 2007, art. 23"],
+  ["rp", "Registro presupuestal expedido", "Ley 80 de 1993, art. 41"],
+  ["personal", "Hojas de vida del personal mínimo aprobadas por la interventoría", "Pliego de condiciones del contrato"],
+  ["programacion", "Programación de obra y flujo de inversión aprobados", "Pliego de condiciones del contrato"],
+  ["seguridad", "Afiliación del personal a seguridad social y riesgos laborales verificada", "Ley 789 de 2002, art. 50"],
+  ["sst", "Plan de seguridad y salud en el trabajo y plan de manejo ambiental recibidos", "Pliego de condiciones del contrato"],
+  ["interventoria", "Contrato de interventoría o designación de supervisión vigente", "Ley 1474 de 2011, art. 83"]
+];
+const CLIMA = ["Soleado", "Nublado", "Lluvia ligera", "Lluvia fuerte"];
+const SEVERIDAD = { critica: "Crítica", mayor: "Mayor", menor: "Menor" };
+const normReq = t => String(t || "").toLowerCase().replace(/\s+/g, " ").trim();
+
+/* ---------- estado y persistencia ---------- */
+const KEY = "bitaobra.v1";
+let state = null;
+let storageOk = true;
+function load() {
+  try { const raw = localStorage.getItem(KEY); if (raw) return JSON.parse(raw); } catch (e) { storageOk = false; }
+  return null;
+}
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(state)); }
+  catch (e) { storageOk = false; toast("No se pudo guardar en este dispositivo. Libere espacio o quite evidencias pesadas."); }
+}
+const P = () => state.projects.find(p => p.id === state.current);
+
+/* ---------- integridad: cadena de hashes ---------- */
+function entryPayload(e) {
+  return JSON.stringify([e.folio, e.tipo, e.fechaHechos, e.registradoAt, e.autorRol, e.autorNombre, e.clima, e.personal, e.equipos, e.actividades, e.texto,
+    (e.evidencias || []).map(v => [v.at, v.lat, v.lon, sha256(v.img || "")]), e.solicitud ? [e.solicitud.categoria, e.solicitud.venceAt] : null, e.refFolio || null, e.firma ? [e.firma.nombre, e.firma.at, sha256(e.firma.img || "")] : null]
+    .concat(e.nc ? [[e.nc.requisito, e.nc.severidad, e.nc.plazo, e.nc.venceAt]] : [])
+    .concat(e.eficaz != null ? [e.eficaz] : []));
+}
+function sealEntry(p, e) {
+  const prev = p.asientos.length ? p.asientos[p.asientos.length - 1].hash : "0".repeat(64);
+  e.prevHash = prev;
+  e.hash = sha256(prev + entryPayload(e));
+}
+function verifyChain(p) {
+  let prev = "0".repeat(64);
+  for (const e of p.asientos) {
+    if (e.prevHash !== prev || sha256(prev + entryPayload(e)) !== e.hash) return { ok: false, folio: e.folio };
+    prev = e.hash;
+  }
+  return { ok: true };
+}
+
+/* ---------- solicitudes: semáforo ---------- */
+function solicitudEstado(p, e, now = Date.now()) {
+  const s = e.solicitud;
+  if (s.respuestaFolio) {
+    const r = p.asientos.find(x => x.folio === s.respuestaFolio);
+    const dias = businessDaysBetween(e.registradoAt, r.registradoAt);
+    const aTiempo = r.registradoAt <= s.venceAt;
+    return { clase: aTiempo ? "ok" : "bad", texto: aTiempo ? "Respondida a tiempo" : "Respondida tarde", dias, cerrada: true };
+  }
+  const restante = businessDaysBetween(now, s.venceAt);
+  if (now > s.venceAt) return { clase: "bad", texto: "Vencida", dias: businessDaysBetween(e.registradoAt, now), cerrada: false };
+  if (restante <= 1) return { clase: "warn", texto: "Por vencer", dias: businessDaysBetween(e.registradoAt, now), cerrada: false };
+  return { clase: "info", texto: "En plazo", dias: businessDaysBetween(e.registradoAt, now), cerrada: false };
+}
+
+/* ---------- no conformidades: estado ---------- */
+function ncEstado(p, e, now = Date.now()) {
+  const n = e.nc;
+  if (n.cierreFolio) {
+    const c = p.asientos.find(x => x.folio === n.cierreFolio);
+    const ok = c.registradoAt <= n.venceAt;
+    return { clase: ok ? "ok" : "bad", texto: ok ? "Cerrada a tiempo" : "Cerrada tarde", cerrada: true, vencida: false };
+  }
+  const vencida = now > n.venceAt;
+  if (n.correccionFolio) return { clase: vencida ? "bad" : "info", texto: "Corregida, por verificar", cerrada: false, vencida };
+  if (vencida) return { clase: "bad", texto: "Vencida", cerrada: false, vencida };
+  if (businessDaysBetween(now, n.venceAt) <= 1) return { clase: "warn", texto: "Por vencer", cerrada: false, vencida };
+  return { clase: "info", texto: "Abierta en plazo", cerrada: false, vencida };
+}
+
+/* ---------- completitud (criterios del Anexo 1) ---------- */
+function completitud(e) {
+  const c = [
+    isoDay(e.fechaHechos) === isoDay(e.registradoAt),
+    !!e.clima, e.personal !== "" && e.personal != null, !!(e.equipos && e.equipos.trim()),
+    !!(e.actividades && e.actividades.trim()), (e.evidencias || []).length > 0, !!e.firma
+  ];
+  return c.filter(Boolean).length / c.length;
+}
+
+/* ---------- indicadores ---------- */
+function indicadores(p, now = Date.now()) {
+  const sol = p.asientos.filter(e => e.tipo === "solicitud");
+  const est = sol.map(e => ({ e, s: solicitudEstado(p, e, now) }));
+  const cerradas = est.filter(x => x.s.cerrada);
+  const tiempos = cerradas.map(x => x.s.dias);
+  const aTiempo = cerradas.filter(x => x.s.clase === "ok").length;
+  const vencidasAb = est.filter(x => !x.s.cerrada && x.s.clase === "bad");
+  const ip2 = vencidasAb.length ? Math.max(...vencidasAb.map(x => businessDaysBetween(x.e.solicitud.venceAt, now))) : 0;
+  // No conformidades (INC1 a INC3)
+  const ncs = p.asientos.filter(e => e.tipo === "noConformidad").map(e => ({ e, s: ncEstado(p, e, now) }));
+  const ncAb = ncs.filter(x => !x.s.cerrada);
+  const ncCer = ncs.filter(x => x.s.cerrada);
+  const ncVenAb = ncAb.filter(x => x.s.vencida).length;
+  const ncDen = ncCer.length + ncVenAb;
+  // INC3: NC cuyo requisito coincide con el de una NC ya cerrada cuando se registró
+  let reinc = 0;
+  ncs.forEach(x => { const r = normReq(x.e.nc.requisito); if (ncs.some(y => y.e.folio < x.e.folio && y.s.cerrada && normReq(y.e.nc.requisito) === r && p.asientos.find(z => z.folio === y.e.nc.cierreFolio).registradoAt < x.e.registradoAt)) reinc++; });
+  const diarios = p.asientos.filter(e => e.tipo === "diario");
+  const comp = diarios.length ? diarios.reduce((a, e) => a + completitud(e), 0) / diarios.length : null;
+  const oportunos = diarios.filter(e => isoDay(e.fechaHechos) === isoDay(e.registradoAt)).length;
+  let diasSin = null, avance = null;
+  if (p.acta.suscrita) {
+    const inicio = p.acta.fechaInicio;
+    const dias = new Set(diarios.map(e => isoDay(e.fechaHechos)));
+    let falt = 0;
+    for (let t = inicio; t <= Math.min(now, inicio + p.plazoDias * DAY); t += DAY) { const d = new Date(t); if (isWeekday(d) && !dias.has(isoDay(d)) && isoDay(d) !== isoDay(now)) falt++; }
+    diasSin = falt;
+    avance = Math.max(0, Math.min(1, (now - inicio) / (p.plazoDias * DAY)));
+  }
+  return {
+    total: sol.length, abiertas: est.filter(x => !x.s.cerrada).length,
+    vencidas: est.filter(x => !x.s.cerrada && x.s.clase === "bad").length,
+    porVencer: est.filter(x => !x.s.cerrada && x.s.clase === "warn").length,
+    mediana: median(tiempos), p90: percentil(tiempos, 0.9), ip2,
+    // IR2: las solicitudes abiertas vencidas cuentan como incumplidas (evita el sesgo de supervivencia)
+    pctATiempo: (cerradas.length + vencidasAb.length) ? aTiempo / (cerradas.length + vencidasAb.length) : null, cerradas: cerradas.length,
+    ncTotal: ncs.length, ncAbiertas: ncAb.length, ncCriticas: ncAb.filter(x => x.e.nc.severidad === "critica").length,
+    ncMayores: ncAb.filter(x => x.e.nc.severidad === "mayor").length, ncMenores: ncAb.filter(x => x.e.nc.severidad === "menor").length,
+    pctNC: ncDen ? ncCer.filter(x => x.s.clase === "ok").length / ncDen : null, reinc: ncs.length ? reinc / ncs.length : null,
+    comp, oportunidad: diarios.length ? oportunos / diarios.length : null, diarios: diarios.length, diasSin, avance
+  };
+}
+
+/* ---------- datos de ejemplo ---------- */
+function blankProject(extra = {}) {
+  return Object.assign({
+    id: uid(), ejemplo: false, contrato: "", objeto: "", entidad: "", contratista: "", interventoria: "",
+    residente: "", interventor: "", supervisor: "", valor: 0, plazoDias: 120, plazoRespuesta: 3, municipio: "",
+    plazosNC: { critica: 1, mayor: 5, menor: 10 }, mejoras: [],
+    acta: { checks: {}, firmas: {}, suscrita: false, fechaInicio: null },
+    asientos: []
+  }, extra);
+}
+function sampleImage(label, hue) {
+  const c = document.createElement("canvas"); c.width = 320; c.height = 240;
+  const g = c.getContext("2d");
+  const gr = g.createLinearGradient(0, 0, 0, 240); gr.addColorStop(0, `hsl(${hue},35%,72%)`); gr.addColorStop(1, `hsl(${hue},20%,42%)`);
+  g.fillStyle = gr; g.fillRect(0, 0, 320, 240);
+  g.fillStyle = "rgba(255,255,255,.85)"; g.fillRect(0, 196, 320, 44);
+  g.fillStyle = "#18222b"; g.font = "600 17px sans-serif"; g.fillText(label, 12, 224);
+  g.strokeStyle = "rgba(255,255,255,.6)"; g.lineWidth = 2;
+  for (let i = 0; i < 5; i++) { g.strokeRect(40 + i * 48, 70 - i * 6, 40, 110 + i * 6); }
+  return c.toDataURL("image/jpeg", 0.7);
+}
+function sampleLogo() {
+  const c = document.createElement("canvas"); c.width = 360; c.height = 140;
+  const g = c.getContext("2d");
+  g.fillStyle = "#fff"; g.fillRect(0, 0, 360, 140);
+  g.fillStyle = "#1f4f8f"; g.beginPath(); g.moveTo(20, 115); g.lineTo(70, 25); g.lineTo(120, 115); g.closePath(); g.fill();
+  g.fillStyle = "#f2a900"; g.fillRect(58, 70, 24, 45);
+  g.fillStyle = "#18222b"; g.font = "700 34px sans-serif"; g.fillText("ITV", 138, 70);
+  g.font = "500 15px sans-serif"; g.fillText("Interventoría Técnica", 138, 94); g.fillText("del Valle S.A.S.", 138, 113);
+  return c.toDataURL("image/png");
+}
+function sampleSignature(name) {
+  const c = document.createElement("canvas"); c.width = 360; c.height = 100;
+  const g = c.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, 360, 100);
+  g.fillStyle = "#1f3f78"; g.font = "italic 30px 'Brush Script MT', cursive"; g.fillText(name, 18, 62);
+  return c.toDataURL("image/png");
+}
+function buildSample() {
+  const now = Date.now();
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  // inicio: 25 días hábiles atrás
+  let inicio = today.getTime(); let k = 0;
+  while (k < 25) { inicio -= DAY; if (isWeekday(new Date(inicio))) k++; }
+  const p = blankProject({
+    ejemplo: true, contrato: "OBRA-014-2026", objeto: "Construcción de cuatro aulas y batería sanitaria en la Institución Educativa Rural El Carmen",
+    entidad: "Municipio de ejemplo (Secretaría de Infraestructura)", contratista: "Consorcio Aulas 2026", interventoria: "Interventoría Técnica del Valle S.A.S.",
+    residente: "Ing. Laura Méndez", interventor: "Ing. Andrés Rojas", supervisor: "Arq. Camila Torres", valor: 1450000000, plazoDias: 150, plazoRespuesta: 3, municipio: "[Municipio]"
+  });
+  REQUISITOS.forEach(([k]) => p.acta.checks[k] = true);
+  for (const [rol, nombre] of [["contratista", p.residente], ["interventor", p.interventor], ["entidad", p.supervisor]])
+    p.acta.firmas[rol] = { nombre, img: sampleSignature(nombre), at: inicio - DAY / 3 };
+  p.acta.suscrita = true; p.acta.fechaInicio = inicio;
+  p.logo = sampleLogo();
+
+  const acts = [
+    "Localización y replanteo del área de aulas; descapote manual.", "Excavación manual para zapatas Z1 a Z6.", "Excavación de zapatas Z7 a Z12 y vigas de cimentación.",
+    "Solado de limpieza en zapatas; armado de acero de refuerzo.", "Fundida de zapatas Z1 a Z6, concreto 21 MPa. Toma de cilindros.", "Fundida de zapatas Z7 a Z12.",
+    "Armado de vigas de cimentación eje A-B.", "Fundida de vigas de cimentación eje A-B.", "Relleno compactado con material seleccionado.", "Armado de columnas primer piso.",
+    "Fundida de columnas C1 a C8.", "Desencofrado de columnas; inicio de mampostería eje 1.", "Mampostería eje 1 y 2.", "Mampostería eje 3; instalación de tubería sanitaria.",
+    "Pruebas de estanqueidad red sanitaria.", "Armado de formaleta de viga aérea.", "Armado de acero de viga aérea.", "Fundida de viga aérea y placa de batería sanitaria.",
+    "Curado de placa; mampostería batería sanitaria.", "Pañete interior aula 1."
+  ];
+  const plan = [];
+  let t = inicio, i = 0;
+  while (t < today.getTime() - DAY && i < acts.length) {
+    const d = new Date(t);
+    if (isWeekday(d)) {
+      const late = i % 6 === 4; // algunos registros tardíos, como en papel
+      plan.push({ hechos: t + 9 * 3600000, reg: t + (late ? DAY * 2 : 0) + 17 * 3600000, act: acts[i], i });
+      i++;
+    }
+    t += DAY;
+  }
+  const items = [];
+  plan.forEach(x => items.push({
+    tipo: "diario", autorRol: "contratista", autorNombre: p.residente, fechaHechos: x.hechos, registradoAt: x.reg,
+    clima: CLIMA[x.i % 3 === 2 ? 2 : x.i % 2], personal: 8 + (x.i % 5), equipos: x.i % 4 === 0 ? "" : "Mezcladora 1 bulto, vibrador, andamios",
+    actividades: x.act, texto: "", evidencias: x.i % 3 === 1 ? [] : [{ img: sampleImage("Frente aulas · día " + (x.i + 1), 200 + x.i * 7), at: x.hechos, lat: 3.4516, lon: -76.532, nombre: "foto.jpg" }]
+  }));
+  // solicitudes con distintos desenlaces
+  const solDefs = [
+    { d: 2, cat: "Aprobación de material", txt: "Solicitamos aprobación del proveedor de acero de refuerzo (certificado de calidad adjunto).", resp: 1.2, r: "Aprobado el proveedor. Se exige certificado por lote." },
+    { d: 6, cat: "Consulta técnica", txt: "Se encontró nivel freático a 1,40 m en zapata Z9. Solicitamos concepto sobre ajuste de la cota de cimentación.", resp: 4.6, r: "Se mantiene la cota. Implementar bombeo y solado de 10 cm. Ver concepto del geotecnista." },
+    { d: 11, cat: "Mayor cantidad de obra", txt: "Se requieren 18 m³ adicionales de relleno seleccionado por sobreexcavación en zona de nivel freático.", resp: 2.1, r: "Se aprueba previa medición conjunta. Registrar acta de mayores cantidades." },
+    { d: 16, cat: "Aprobación de personal", txt: "Solicitamos aprobación del maestro de obra de reemplazo (hoja de vida adjunta).", resp: 0.6, r: "Aprobado. Cumple experiencia mínima." },
+    { d: 20, cat: "Obra no prevista", txt: "La entidad solicitó rampa de acceso para movilidad reducida no incluida en planos. Solicitamos diseño y aprobación de precio no previsto.", resp: null },
+    { d: 23, cat: "Consulta técnica", txt: "Confirmar especificación del enchape de la batería sanitaria (formato y color).", resp: null }
+  ];
+  solDefs.forEach(s => {
+    let base = inicio; let c = 0; while (c < s.d) { base += DAY; if (isWeekday(new Date(base))) c++; }
+    const at = base + 10 * 3600000;
+    items.push({ tipo: "solicitud", autorRol: "contratista", autorNombre: p.residente, fechaHechos: at, registradoAt: at, texto: s.txt, solicitud: { categoria: s.cat, plazo: p.plazoRespuesta }, _resp: s });
+  });
+  const ncAt = (d, h) => { let base = inicio; let c = 0; while (c < d) { base += DAY; if (isWeekday(new Date(base))) c++; } return base + h * 3600000; };
+  [
+    { d: 9, req: "Especificación 4.1: relleno con material seleccionado", sev: "mayor", txt: "Relleno del eje C ejecutado con material con contenido orgánico, contrario a la especificación.", corr: 3, cierre: 4 },
+    { d: 18, req: "NSR-10 C.5.11: curado del concreto", sev: "menor", txt: "Placa de la batería sanitaria sin curado durante las primeras 24 horas.", corr: 2, cierre: null },
+    { d: 22, req: "Plan de SST: trabajo en alturas", sev: "critica", txt: "Personal trabajando sobre la viga aérea sin línea de vida ni arnés.", corr: null, cierre: null }
+  ].forEach(n => {
+    const at = ncAt(n.d, 11);
+    items.push({ tipo: "noConformidad", autorRol: "interventor", autorNombre: p.interventor, fechaHechos: at, registradoAt: at, texto: n.txt, nc: { requisito: n.req, severidad: n.sev, plazo: p.plazosNC[n.sev] }, _nc: n });
+  });
+  items.push({ tipo: "orden", autorRol: "interventor", autorNombre: p.interventor, fechaHechos: plan[8].hechos + 3600000, registradoAt: plan[8].hechos + 3600000, texto: "Se ordena retirar el material de relleno con contenido orgánico acopiado junto al eje C y reemplazarlo por material seleccionado según especificación." });
+  items.push({ tipo: "visita", autorRol: "interventor", autorNombre: p.interventor, fechaHechos: plan[14].hechos, registradoAt: plan[14].hechos + 2 * 3600000, texto: "Visita de seguimiento. Prueba de estanqueidad satisfactoria. Avance físico estimado 21 %. Se recuerda entregar resultados de cilindros a 28 días." });
+  items.sort((a, b) => a.registradoAt - b.registradoAt);
+  // registrar en orden, con respuestas intercaladas
+  const pending = [];
+  const pendingNC = [];
+  const commit = (e) => { e.folio = p.asientos.length + 1; e.firma = { nombre: e.autorNombre, img: sampleSignature(e.autorNombre), at: e.registradoAt }; sealEntry(p, e); p.asientos.push(e); };
+  // Registra en orden cronológico las respuestas, correcciones y cierres pendientes hasta el instante t.
+  const flushUntil = (t) => {
+    for (;;) {
+      pending.sort((a, b) => a.at - b.at); pendingNC.sort((a, b) => a.at - b.at);
+      const a = pending[0], b = pendingNC[0];
+      const next = a && a.at <= t && (!b || a.at <= b.at) ? "sol" : b && b.at <= t ? "nc" : null;
+      if (!next) return;
+      if (next === "sol") {
+        const r = pending.shift();
+        const e = { tipo: "respuesta", autorRol: "interventor", autorNombre: p.interventor, fechaHechos: r.at, registradoAt: r.at, texto: r.texto, refFolio: r.sol.folio, decision: r.decision };
+        commit(e); r.sol.solicitud.respuestaFolio = e.folio;
+      } else {
+        const r = pendingNC.shift();
+        const corr = r.tipo === "correccion";
+        const e = { tipo: r.tipo, autorRol: corr ? "contratista" : "interventor", autorNombre: corr ? p.residente : p.interventor, fechaHechos: r.at, registradoAt: r.at, texto: r.texto, refFolio: r.nc.folio };
+        if (!corr) e.eficaz = true;
+        commit(e);
+        if (corr) r.nc.nc.correccionFolio = e.folio; else r.nc.nc.cierreFolio = e.folio;
+      }
+    }
+  };
+  for (const it of items) {
+    flushUntil(it.registradoAt);
+    const r = it._resp; delete it._resp;
+    const ncDef = it._nc; delete it._nc;
+    if (it.solicitud) it.solicitud.venceAt = addBusinessDays(it.registradoAt, it.solicitud.plazo);
+    if (it.nc) it.nc.venceAt = addBusinessDays(it.registradoAt, it.nc.plazo);
+    commit(it);
+    if (ncDef && ncDef.corr != null) {
+      const cAt = addBusinessDays(it.registradoAt, ncDef.corr);
+      pendingNC.push({ at: cAt, nc: it, tipo: "correccion", texto: "Se retiró y reemplazó lo no conforme. Acción correctiva: verificación previa del material o procedimiento por el residente antes de ejecutar." });
+      if (ncDef.cierre != null) pendingNC.push({ at: addBusinessDays(it.registradoAt, ncDef.cierre), nc: it, tipo: "cierreNC", texto: "Verificada en campo la corrección. Es eficaz; se cierra la no conformidad." });
+    }
+    if (r && r.resp != null) {
+      let at = it.registradoAt; let left = r.resp;
+      while (left > 0) { const step = Math.min(left, 1); at += step * DAY; if (!isWeekday(new Date(at))) { at += DAY * (new Date(at).getDay() === 6 ? 2 : 1); } left -= step; }
+      pending.push({ at, sol: it, texto: r.r, decision: r.r.startsWith("Se mantiene") ? "Información" : "Aprobada" });
+    }
+  }
+  flushUntil(now);
+  return p;
+}
+function freshState() {
+  const p = buildSample();
+  return { projects: [p], current: p.id, role: "contratista", tab: "resumen" };
+}
+
+/* ---------- interfaz general ---------- */
+function toast(msg) {
+  const t = document.createElement("div"); t.className = "toast"; t.textContent = msg; t.setAttribute("role", "status");
+  document.body.appendChild(t); setTimeout(() => t.remove(), 3200);
+}
+function setTab(tab) { state.tab = tab; save(); render(); window.scrollTo(0, 0); }
+function render() {
+  const p = P();
+  $("#roleSel").value = state.role;
+  $("#projSel").innerHTML = state.projects.map(x => `<option value="${x.id}" ${x.id === state.current ? "selected" : ""}>${esc(x.contrato || "Proyecto sin número")}${x.ejemplo ? " (ejemplo)" : ""}</option>`).join("") + `<option value="__new">+ Nuevo proyecto</option>`;
+  $("#projName").textContent = p.objeto || "Proyecto nuevo";
+  const ind = indicadores(p);
+  document.querySelectorAll("#tabs button").forEach(b => {
+    b.setAttribute("aria-selected", b.dataset.tab === state.tab ? "true" : "false");
+    if (b.dataset.tab === "solicitudes") b.innerHTML = "Solicitudes" + (ind.vencidas ? `<span class="count">${ind.vencidas}</span>` : "");
+    if (b.dataset.tab === "nc") b.innerHTML = "No conformidades" + (ind.ncCriticas ? `<span class="count">${ind.ncCriticas}</span>` : "");
+  });
+  const v = $("#view");
+  const banner = p.ejemplo ? `<div class="example-banner">Proyecto de <b>ejemplo</b> con datos ficticios para demostrar el flujo. Cree uno nuevo desde el selector de proyectos para trabajar con datos reales.</div>` : "";
+  const views = { resumen: viewResumen, acta: viewActa, bitacora: viewBitacora, solicitudes: viewSolicitudes, nc: viewNC, reporte: viewReporte, proyecto: viewProyecto };
+  v.innerHTML = banner + (storageOk ? "" : `<div class="example-banner">Este navegador no permite guardar datos; los cambios se perderán al cerrar la página.</div>`) + views[state.tab](p, ind);
+  bindView(p);
+}
+
+/* ---------- vista: resumen ---------- */
+function kpi(label, value, cls = "", sub = "") { return `<div class="kpi ${cls}"><span class="label">${label}</span><span class="v">${value}</span>${sub ? `<span class="small muted">${sub}</span>` : ""}</div>`; }
+function pct(x) { return x == null ? "—" : Math.round(x * 100) + "<small> %</small>"; }
+const dias = x => x == null ? "—" : x.toFixed(1).replace(".", ",");
+// Tablero del ciclo PHVA: cada indicador con su valor acumulado, la meta y el estado.
+function tablero(p, ind) {
+  const pc = x => x == null ? "—" : Math.round(x * 100) + " %";
+  const st = (cond, warn) => cond == null ? ["idle", "Sin datos"] : cond ? ["ok", "Cumple"] : warn ? ["warn", "Vigilar"] : ["bad", "Actuar"];
+  return [
+    ["Capacidad de respuesta"],
+    ["IR1", "Tiempo de respuesta (mediana / P90)", `${dias(ind.mediana)} / ${dias(ind.p90)} días háb.`, `P90 ≤ ${p.plazoRespuesta}`, st(ind.p90 == null ? null : ind.p90 <= p.plazoRespuesta)],
+    ["IR2", "Cumplimiento del plazo de respuesta", pc(ind.pctATiempo), "≥ 90 %", st(ind.pctATiempo == null ? null : ind.pctATiempo >= 0.9)],
+    ["Pendientes vencidos"],
+    ["IP1", "Solicitudes vencidas", String(ind.vencidas), "0", st(ind.vencidas === 0)],
+    ["IP2", "Antigüedad del atraso", `${dias(ind.ip2)} días háb.`, "0", ind.ip2 === 0 ? ["ok", "Cumple"] : ind.ip2 <= 2 ? ["warn", "Vigilar"] : ["bad", "Actuar"]],
+    ["No conformidades"],
+    ["INC1", "NC abiertas (crít. / may. / men.)", `${ind.ncCriticas} / ${ind.ncMayores} / ${ind.ncMenores}`, "0 críticas", ind.ncCriticas ? ["bad", "Actuar"] : ind.ncAbiertas ? ["warn", "Vigilar"] : ["ok", "Cumple"]],
+    ["INC2", "Cierre oportuno de NC", pc(ind.pctNC), "≥ 80 %", st(ind.pctNC == null ? null : ind.pctNC >= 0.8)],
+    ["INC3", "Reincidencia", pc(ind.reinc), "≤ 10 %", st(ind.reinc == null ? null : ind.reinc <= 0.1)],
+    ["Orden del registro"],
+    ["IO1", "Registro el mismo día", pc(ind.oportunidad), "≥ 90 %", st(ind.oportunidad == null ? null : ind.oportunidad >= 0.9)],
+    ["IO2", "Completitud del registro", ind.comp == null ? "—" : ind.comp.toFixed(2).replace(".", ","), "≥ 0,90", st(ind.comp == null ? null : ind.comp >= 0.9)],
+    ["IO3", "Días hábiles sin registro", String(ind.diasSin ?? "—"), "0", st(ind.diasSin == null ? null : ind.diasSin === 0)]
+  ];
+}
+function viewResumen(p, ind) {
+  if (!p.acta.suscrita) return `<section class="panel"><h2>El contrato aún no ha iniciado</h2><p class="muted">La bitácora y las solicitudes se habilitan cuando el acta de inicio esté suscrita por el contratista y la interventoría.</p><div><button class="btn primary" data-go="acta">Ir al acta de inicio</button></div></section>`;
+  const fin = p.acta.fechaInicio + p.plazoDias * DAY;
+  const chain = verifyChain(p);
+  const rows = tablero(p, ind);
+  const alertas = rows.filter(r => r.length > 1 && r[4][0] === "bad");
+  const medCls = ind.mediana == null ? "" : ind.mediana <= p.plazoRespuesta ? "good" : "bad";
+  const openRows = p.asientos.filter(e => e.tipo === "solicitud").map(e => ({ e, s: solicitudEstado(p, e) })).filter(x => !x.s.cerrada);
+  const mejoras = p.mejoras || [];
+  const estMej = { abierta: ["info", "Abierta"], eficaz: ["ok", "Eficaz"], "no eficaz": ["bad", "No eficaz"] };
+  return `
+  <section class="panel">
+    <div class="panel-head"><h2>Estado del contrato ${esc(p.contrato)}</h2><span class="small muted">Inicio ${fmtDate(p.acta.fechaInicio)} · Terminación ${fmtDate(fin)}</span></div>
+    <div class="bar" aria-label="Plazo transcurrido"><span style="width:${Math.round(ind.avance * 100)}%"></span></div>
+    <p class="small muted">Plazo transcurrido: ${Math.round(ind.avance * 100)} % de ${p.plazoDias} días calendario.</p>
+    <div class="kpis">
+      ${kpi("Mediana de respuesta", dias(ind.mediana) + "<small> días háb.</small>", medCls, `P90: ${dias(ind.p90)} · plazo ${p.plazoRespuesta}`)}
+      ${kpi("Solicitudes vencidas", ind.vencidas, ind.vencidas ? "bad" : "good", `${ind.abiertas} abiertas`)}
+      ${kpi("NC abiertas", ind.ncAbiertas, ind.ncCriticas ? "bad" : ind.ncAbiertas ? "warn" : "good", `${ind.ncCriticas} críticas`)}
+      ${kpi("Integridad", chain.ok ? "Íntegra" : "Alterada", chain.ok ? "good" : "bad", chain.ok ? `${p.asientos.length} folios encadenados` : `Revise el folio ${chain.folio}`)}
+    </div>
+  </section>
+  <section class="panel">
+    <div class="panel-head"><h3>Tablero de mejora continua (PHVA)</h3><span class="small muted">Acumulado del contrato · días hábiles sin sábados, domingos ni festivos</span></div>
+    ${alertas.length ? `<p class="small"><span class="pill bad">${alertas.length} ${alertas.length === 1 ? "indicador pide" : "indicadores piden"} actuar</span> Analice la causa y registre una acción de mejora.</p>` : ""}
+    <div class="table-wrap"><table><thead><tr><th>Cód.</th><th>Indicador</th><th>Valor</th><th>Meta</th><th>Estado</th><th></th></tr></thead><tbody>
+      ${rows.map(r => r.length === 1 ? `<tr><td colspan="6" class="label" style="padding-top:14px">${r[0]}</td></tr>` :
+        `<tr><td class="mono">${r[0]}</td><td>${r[1]}</td><td class="num">${r[2]}</td><td class="num">${r[3]}</td><td><span class="pill ${r[4][0]}">${r[4][1]}</span></td><td>${r[4][0] === "bad" && state.role === "interventor" ? `<button class="btn small" data-mejora="${r[0]}" data-valor="${esc(r[2])}">Acción de mejora</button>` : ""}</td></tr>`).join("")}
+    </tbody></table></div>
+    ${state.role !== "interventor" && alertas.length ? `<p class="small muted">Las acciones de mejora las registra la interventoría.</p>` : ""}
+  </section>
+  <section class="panel">
+    <div class="panel-head"><h3>Acciones de mejora</h3><span class="small muted">Se cierran como eficaces solo si el indicador vuelve a la meta</span></div>
+    ${mejoras.length ? `<div class="table-wrap"><table><thead><tr><th>Indicador</th><th>Causa y acción</th><th>Responsable</th><th>Compromiso</th><th>Estado</th><th></th></tr></thead><tbody>
+      ${mejoras.slice().reverse().map(m => `<tr><td class="mono">${esc(m.indicador)}<div class="small muted">${esc(m.valorDetectado)}</div></td><td><b>Causa:</b> ${esc(m.causa)}<div><b>Acción:</b> ${esc(m.accion)}</div></td><td>${esc(m.responsable)}</td><td>${fmtDate(m.fechaCompromiso + "T12:00")}</td><td><span class="pill ${estMej[m.estado][0]}">${estMej[m.estado][1]}</span></td><td>${m.estado === "abierta" && state.role === "interventor" ? `<div class="row"><button class="btn small" data-mej-ok="${m.id}">Eficaz</button><button class="btn small" data-mej-no="${m.id}">No eficaz</button></div>` : ""}</td></tr>`).join("")}
+    </tbody></table></div>` : `<div class="empty">Aún no hay acciones de mejora. Cuando un indicador del tablero pida actuar, la interventoría registra aquí la causa, la acción, el responsable y la fecha de compromiso.</div>`}
+  </section>
+  <section class="panel">
+    <h3>Solicitudes abiertas</h3>
+    ${openRows.length ? `<div class="table-wrap"><table><thead><tr><th>Folio</th><th>Solicitud</th><th>Vence</th><th>Estado</th></tr></thead><tbody>${openRows.map(x => `<tr><td class="mono">${x.e.folio}</td><td>${esc(x.e.solicitud.categoria)}<div class="small muted">${esc(x.e.texto.slice(0, 90))}${x.e.texto.length > 90 ? "…" : ""}</div></td><td>${fmtDate(x.e.solicitud.venceAt)}</td><td><span class="pill ${x.s.clase}">${x.s.texto}</span></td></tr>`).join("")}</tbody></table></div>` : `<p class="muted small">No hay solicitudes abiertas.</p>`}
+  </section>`;
+}
+
+/* ---------- vista: acta de inicio ---------- */
+function viewActa(p) {
+  const a = p.acta;
+  const allChecks = REQUISITOS.every(([k]) => a.checks[k]);
+  const req = ["contratista", "interventor"];
+  const sigCard = rol => {
+    const f = a.firmas[rol];
+    const nombre = p[ROLES[rol].campo] || "(sin nombre)";
+    const canSign = !a.suscrita && allChecks && state.role === rol && !f;
+    return `<div class="sig"><span class="label">${ROLES[rol].nombre}${rol === "entidad" ? " (opcional)" : ""}</span>
+      ${f ? `<img src="${f.img}" alt="Firma de ${esc(f.nombre)}"><span><b>${esc(f.nombre)}</b></span><span class="small muted">Firmó ${fmtDateTime(f.at)}</span>`
+          : `<span>${esc(nombre)}</span><span class="small muted">${allChecks ? (state.role === rol ? "Puede firmar ahora." : `Cambie el rol a «${ROLES[rol].nombre}» para firmar.`) : "Pendiente: complete los requisitos."}</span>
+             <div><button class="btn primary small" data-sign-acta="${rol}" ${canSign ? "" : "disabled"}>Firmar acta</button></div>`}
+    </div>`;
+  };
+  return `
+  <section class="panel">
+    <div class="panel-head"><h2>Acta de inicio</h2>${a.suscrita ? `<span class="pill ok">Suscrita</span>` : `<span class="pill warn">En preparación</span>`}</div>
+    <div class="grid2">
+      <div class="facts"><div><span>Contrato</span><br>${esc(p.contrato)}</div><div><span>Valor</span><br>${fmtMoney(p.valor)}</div><div><span>Plazo</span><br>${p.plazoDias} días calendario</div><div><span>Plazo de respuesta acordado</span><br>${p.plazoRespuesta} días hábiles</div></div>
+      <div class="facts"><div><span>Entidad</span><br>${esc(p.entidad)}</div><div><span>Contratista</span><br>${esc(p.contratista)}</div><div><span>Interventoría</span><br>${esc(p.interventoria)}</div></div>
+    </div>
+    <p><span class="label">Objeto</span><br>${esc(p.objeto)}</p>
+  </section>
+  <section class="panel">
+    <div class="panel-head"><h3>Requisitos previos</h3><span class="small muted">${REQUISITOS.filter(([k]) => a.checks[k]).length} de ${REQUISITOS.length} verificados</span></div>
+    <p class="small muted">El acta solo se puede firmar cuando la interventoría verifica todos los requisitos de ejecución.${state.role !== "interventor" && !a.suscrita ? " Cambie el rol a Interventoría para marcarlos." : ""}</p>
+    <div class="checklist">
+      ${REQUISITOS.map(([k, t, n]) => `<label class="check ${a.checks[k] ? "done" : ""}" for="chk-${k}"><input type="checkbox" id="chk-${k}" data-check="${k}" ${a.checks[k] ? "checked" : ""} ${a.suscrita || state.role !== "interventor" ? "disabled" : ""}><span>${esc(t)}<br><span class="small muted">${esc(n)}</span></span></label>`).join("")}
+    </div>
+  </section>
+  <section class="panel">
+    <div class="row"><button class="btn ${a.suscrita ? "primary" : ""}" data-pdf-acta>${a.suscrita ? "Descargar acta en PDF" : "Descargar borrador en PDF"}</button></div>
+    <div class="panel-head"><h3>Firmas</h3>${a.suscrita ? `<span class="small muted">Fecha de inicio: <b>${fmtDate(a.fechaInicio)}</b> · Terminación prevista: <b>${fmtDate(a.fechaInicio + p.plazoDias * DAY)}</b></span>` : ""}</div>
+    <div class="sigs">${["contratista", "interventor", "entidad"].map(sigCard).join("")}</div>
+    ${!a.suscrita && req.every(r => a.firmas[r]) ? "" : ""}
+  </section>`;
+}
+
+/* ---------- vista: bitácora ---------- */
+function entryCard(p, e, opts = {}) {
+  const t = TIPOS[e.tipo];
+  let extra = "";
+  if (e.tipo === "solicitud") { const s = solicitudEstado(p, e); extra = `<span class="pill ${s.clase}">${s.texto}</span><span>${esc(e.solicitud.categoria)} · vence ${fmtDate(e.solicitud.venceAt)}</span>`; }
+  if (e.tipo === "respuesta") extra = `<span class="pill ok">${esc(e.decision || "Respuesta")}</span><span>Responde al folio ${e.refFolio}</span>`;
+  if (e.tipo === "aclaracion") extra = `<span>Aclara el folio ${e.refFolio}</span>`;
+  if (e.tipo === "noConformidad") { const s = ncEstado(p, e); extra = `<span class="pill ${s.clase}">${s.texto}</span><span>${SEVERIDAD[e.nc.severidad]} · corregir antes de ${fmtDate(e.nc.venceAt)}</span>`; }
+  if (e.tipo === "correccion") extra = `<span>Corrige la no conformidad del folio ${e.refFolio}</span>`;
+  if (e.tipo === "cierreNC") extra = `<span class="pill ${e.eficaz ? "ok" : "bad"}">${e.eficaz ? "Corrección eficaz" : "Corrección no eficaz"}</span><span>No conformidad del folio ${e.refFolio}</span>`;
+  const tardio = isoDay(e.fechaHechos) !== isoDay(e.registradoAt);
+  return `<article class="entry t-${e.tipo}" id="folio-${e.folio}">
+    <div class="folio"><span class="label">Folio</span><span class="n">${String(e.folio).padStart(3, "0")}</span></div>
+    <div class="body">
+      <div class="meta"><b style="color:var(--ink)">${t.nombre}</b><span>${esc(e.autorNombre)} · ${ROLES[e.autorRol].nombre}</span>${extra}</div>
+      <div class="meta"><span>Hechos: ${fmtDate(e.fechaHechos)}</span><span>Registrado: ${fmtDateTime(e.registradoAt)}</span>${tardio ? `<span class="pill warn">Registro tardío</span>` : ""}</div>
+      ${e.tipo === "diario" ? `<div class="facts"><div><span>Clima</span><br>${esc(e.clima || "—")}</div><div><span>Personal</span><br>${esc(e.personal ?? "—")}</div><div><span>Equipos</span><br>${esc(e.equipos || "—")}</div></div><div class="text">${esc(e.actividades)}</div>` : ""}
+      ${e.nc ? `<div class="small"><span class="muted">Requisito incumplido:</span> ${esc(e.nc.requisito)}</div>` : ""}
+      ${e.texto ? `<div class="text">${esc(e.texto)}</div>` : ""}
+      ${(e.evidencias || []).length ? `<div class="thumbs">${e.evidencias.map(v => `<figure class="thumb" style="margin:0"><img src="${v.img}" alt="Evidencia del folio ${e.folio}"><figcaption>${fmtDateTime(v.at)}${v.lat != null ? `<br>${v.lat.toFixed(4)}, ${v.lon.toFixed(4)}` : "<br>Sin ubicación"}</figcaption></figure>`).join("")}</div>` : ""}
+      <div class="row" style="justify-content:space-between">
+        <span class="hash" title="Huella SHA-256 encadenada">Huella ${e.hash.slice(0, 16)}… · firmado por ${esc(e.firma?.nombre || "")}</span>
+        ${opts.actions !== false ? `<span class="row no-print">
+          ${e.tipo === "solicitud" && !e.solicitud.respuestaFolio && state.role === "interventor" ? `<button class="btn primary small" data-respond="${e.folio}">Responder</button>` : ""}
+          ${ncActions(e)}
+          ${e.tipo !== "respuesta" ? `<button class="btn small" data-clarify="${e.folio}">Aclarar</button>` : ""}
+          <button class="btn small" data-pdf-folio="${e.folio}">PDF</button>
+        </span>` : ""}
+      </div>
+    </div>
+  </article>`;
+}
+function ncActions(e) {
+  if (e.tipo !== "noConformidad" || e.nc.cierreFolio) return "";
+  if (!e.nc.correccionFolio && state.role === "contratista") return `<button class="btn primary small" data-correct="${e.folio}">Registrar corrección</button>`;
+  if (e.nc.correccionFolio && state.role === "interventor") return `<button class="btn primary small" data-verify="${e.folio}">Verificar corrección</button>`;
+  return "";
+}
+function viewBitacora(p) {
+  if (!p.acta.suscrita) return `<section class="panel"><h2>Bitácora bloqueada</h2><p class="muted">No se pueden registrar asientos antes de suscribir el acta de inicio, porque el plazo contractual aún no corre.</p><div><button class="btn primary" data-go="acta">Ir al acta de inicio</button></div></section>`;
+  const allowed = Object.entries(TIPOS).filter(([k, t]) => t.roles.includes(state.role));
+  const f = state.filter || "todos";
+  const list = p.asientos.filter(e => f === "todos" || e.tipo === f).slice().reverse();
+  return `
+  <section class="panel">
+    <div class="panel-head"><h2>Bitácora de obra</h2><span class="small muted">${p.asientos.length} folios · los asientos firmados no se pueden editar</span></div>
+    <div class="row"><label class="row small muted" for="diaPDF">Informe diario en PDF del <input type="date" id="diaPDF" style="width:auto" value="${state.diaPDF || isoDay(Date.now())}" max="${isoDay(Date.now())}"></label><button class="btn" data-pdf-dia>Generar PDF</button></div>
+    <div class="row">${allowed.filter(([k]) => k !== "aclaracion").map(([k, t]) => `<button class="btn ${k === "diario" || k === "visita" ? "primary" : ""}" data-new="${k}">+ ${t.nombre}</button>`).join("")}</div>
+  </section>
+  <section class="panel">
+    <div class="panel-head"><h3>Asientos</h3>
+      <label class="row small muted" for="fltSel">Mostrar <select id="fltSel" style="width:auto">${[["todos", "Todos"], ...Object.entries(TIPOS).map(([k, t]) => [k, t.nombre])].map(([k, n]) => `<option value="${k}" ${f === k ? "selected" : ""}>${n}</option>`).join("")}</select></label>
+    </div>
+    <div class="entries">${list.length ? list.map(e => entryCard(p, e)).join("") : `<div class="empty">Aún no hay asientos de este tipo. Use los botones de arriba para registrar el primero.</div>`}</div>
+  </section>`;
+}
+
+/* ---------- vista: solicitudes ---------- */
+function viewSolicitudes(p, ind) {
+  if (!p.acta.suscrita) return viewBitacora(p);
+  const rows = p.asientos.filter(e => e.tipo === "solicitud").map(e => ({ e, s: solicitudEstado(p, e) }));
+  const order = { bad: 0, warn: 1, info: 2, ok: 3 };
+  rows.sort((a, b) => (a.s.cerrada - b.s.cerrada) || (order[a.s.clase] - order[b.s.clase]) || a.e.solicitud.venceAt - b.e.solicitud.venceAt);
+  return `
+  <section class="panel">
+    <div class="panel-head"><h2>Solicitudes a la interventoría</h2>${state.role === "contratista" ? `<button class="btn primary" data-new="solicitud">+ Nueva solicitud</button>` : ""}</div>
+    <p class="small muted">Cada solicitud vence ${p.plazoRespuesta} días hábiles después de registrada (plazo pactado en el acta de inicio; no cuentan sábados, domingos ni festivos). La respuesta queda como un folio vinculado y el tiempo se mide automáticamente.</p>
+    <div class="row small"><span class="pill info">En plazo</span><span class="pill warn">Por vencer (menos de 1 día hábil)</span><span class="pill bad">Vencida o respondida tarde</span><span class="pill ok">Respondida a tiempo</span></div>
+    ${rows.length ? `<div class="table-wrap"><table><thead><tr><th>Folio</th><th>Solicitud</th><th>Registrada</th><th>Vence</th><th>Días háb.</th><th>Estado</th><th></th></tr></thead><tbody>
+      ${rows.map(({ e, s }) => `<tr><td class="mono">${e.folio}</td><td><b>${esc(e.solicitud.categoria)}</b><div class="small muted">${esc(e.texto)}</div>${e.solicitud.respuestaFolio ? `<div class="small">Respuesta en folio ${e.solicitud.respuestaFolio}</div>` : ""}</td><td>${fmtDate(e.registradoAt)}</td><td>${fmtDate(e.solicitud.venceAt)}</td><td class="num">${s.dias.toFixed(1).replace(".", ",")}</td><td><span class="pill ${s.clase}">${s.texto}</span></td><td>${!s.cerrada && state.role === "interventor" ? `<button class="btn primary small" data-respond="${e.folio}">Responder</button>` : ""}</td></tr>`).join("")}
+    </tbody></table></div>` : `<div class="empty">No hay solicitudes registradas. El contratista las crea desde aquí o desde la bitácora.</div>`}
+    ${state.role !== "interventor" && ind.abiertas ? `<p class="small muted">Para responder, cambie el rol a Interventoría.</p>` : ""}
+  </section>`;
+}
+
+/* ---------- vista: no conformidades ---------- */
+function viewNC(p, ind) {
+  if (!p.acta.suscrita) return viewBitacora(p);
+  const rows = p.asientos.filter(e => e.tipo === "noConformidad").map(e => ({ e, s: ncEstado(p, e) }));
+  const sevOrd = { critica: 0, mayor: 1, menor: 2 };
+  rows.sort((a, b) => (a.s.cerrada - b.s.cerrada) || (sevOrd[a.e.nc.severidad] - sevOrd[b.e.nc.severidad]) || a.e.nc.venceAt - b.e.nc.venceAt);
+  return `
+  <section class="panel">
+    <div class="panel-head"><h2>No conformidades</h2>${state.role === "interventor" ? `<button class="btn primary" data-new="noConformidad">+ Nueva no conformidad</button>` : ""}</div>
+    <p class="small muted">La interventoría registra el requisito incumplido y la severidad; el plazo de corrección se fija por severidad (crítica ${p.plazosNC.critica}, mayor ${p.plazosNC.mayor}, menor ${p.plazosNC.menor} días hábiles). El contratista registra la corrección y la acción correctiva, y la interventoría cierra la no conformidad solo después de verificar en campo que la corrección es eficaz.</p>
+    ${rows.length ? `<div class="table-wrap"><table><thead><tr><th>Folio</th><th>No conformidad</th><th>Severidad</th><th>Vence</th><th>Estado</th><th></th></tr></thead><tbody>
+      ${rows.map(({ e, s }) => `<tr><td class="mono">${e.folio}</td><td><b>${esc(e.nc.requisito)}</b><div class="small muted">${esc(e.texto)}</div>${e.nc.correccionFolio ? `<div class="small">Corrección en folio ${e.nc.correccionFolio}${e.nc.cierreFolio ? ` · cierre en folio ${e.nc.cierreFolio}` : ""}</div>` : ""}</td><td><span class="pill ${e.nc.severidad === "critica" ? "bad" : e.nc.severidad === "mayor" ? "warn" : "idle"}">${SEVERIDAD[e.nc.severidad]}</span></td><td>${fmtDate(e.nc.venceAt)}</td><td><span class="pill ${s.clase}">${s.texto}</span></td><td>${ncActions(e)}</td></tr>`).join("")}
+    </tbody></table></div>` : `<div class="empty">No hay no conformidades registradas.</div>`}
+  </section>`;
+}
+
+/* ---------- vista: reporte ---------- */
+function viewReporte(p, ind) {
+  const chain = verifyChain(p);
+  const desde = state.rDesde || (p.acta.fechaInicio ? isoDay(p.acta.fechaInicio) : isoDay(Date.now()));
+  const hasta = state.rHasta || isoDay(Date.now());
+  const list = p.asientos.filter(e => isoDay(e.fechaHechos) >= desde && isoDay(e.fechaHechos) <= hasta);
+  return `
+  <section class="panel no-print">
+    <div class="panel-head"><h2>Reporte de bitácora</h2>
+      <div class="row"><button class="btn primary" data-pdf-periodo>Generar PDF del periodo</button>${framed ? "" : `<button class="btn" data-export>Exportar respaldo (JSON)</button><label class="btn" for="impFile">Importar respaldo</label><input type="file" id="impFile" accept="application/json" hidden>`}</div>
+    </div>
+    <div class="grid3"><label class="field" for="rDesde">Desde<input type="date" id="rDesde" value="${desde}"></label><label class="field" for="rHasta">Hasta<input type="date" id="rHasta" value="${hasta}"></label></div>
+    <p class="small muted">El PDF incluye el logo de la interventoría, los datos del contrato, las actividades, las fotos con fecha y ubicación, las firmas y la huella de cada folio.${framed ? " Los respaldos en JSON solo están en la versión local." : ""}</p>
+  </section>
+  <section class="panel report">
+    ${p.logo ? `<img src="${p.logo}" alt="Logo de ${esc(p.interventoria)}" style="max-height:56px;max-width:180px;object-fit:contain">` : ""}
+    <h2>Bitácora de obra · Contrato ${esc(p.contrato)}</h2>
+    <p>${esc(p.objeto)}</p>
+    <div class="facts"><div><span>Entidad</span><br>${esc(p.entidad)}</div><div><span>Contratista</span><br>${esc(p.contratista)}</div><div><span>Interventoría</span><br>${esc(p.interventoria)}</div><div><span>Periodo</span><br>${fmtDate(desde + "T12:00")} a ${fmtDate(hasta + "T12:00")}</div></div>
+    <div class="facts"><div><span>Folios en el periodo</span><br>${list.length}</div><div><span>Tiempo de respuesta (mediana / P90)</span><br>${dias(ind.mediana)} / ${dias(ind.p90)} días hábiles</div><div><span>Cumplimiento del plazo (IR2)</span><br>${ind.pctATiempo == null ? "—" : Math.round(ind.pctATiempo * 100) + " %"}</div><div><span>No conformidades abiertas</span><br>${ind.ncAbiertas} (${ind.ncCriticas} críticas)</div><div><span>Integridad</span><br>${chain.ok ? "Cadena de huellas verificada" : "Alterada en folio " + chain.folio}</div></div>
+    <div class="entries">${list.map(e => entryCard(p, e, { actions: false })).join("") || `<div class="empty">No hay folios en este periodo.</div>`}</div>
+  </section>`;
+}
+
+/* ---------- vista: proyecto ---------- */
+function viewProyecto(p) {
+  const locked = p.acta.suscrita;
+  const f = (id, label, val, type = "text", extra = "") => `<label class="field" for="pf-${id}">${label}<input id="pf-${id}" data-pf="${id}" type="${type}" value="${esc(val)}" ${locked && ["contrato", "valor", "plazoDias", "plazoRespuesta"].includes(id) ? "disabled" : ""} ${extra}></label>`;
+  return `
+  <section class="panel">
+    <div class="panel-head"><h2>Datos del proyecto y roles</h2>${locked ? `<span class="small muted">Contrato, valor y plazos quedan fijos al suscribir el acta.</span>` : ""}</div>
+    <div class="row" style="align-items:center">
+      ${p.logo ? `<img src="${p.logo}" alt="Logo actual" style="max-height:56px;max-width:180px;object-fit:contain;border:1px solid var(--line);border-radius:4px;background:#fff;padding:4px">` : `<span class="small muted">Sin logo de la interventoría.</span>`}
+      <label class="btn" for="logoFile">${p.logo ? "Cambiar logo" : "Subir logo de la interventoría"}</label><input type="file" id="logoFile" accept="image/png,image/jpeg" hidden>
+      ${p.logo ? `<button class="btn small" type="button" data-logo-del>Quitar logo</button>` : ""}
+      <span class="small muted">Aparece en el encabezado de todos los PDF.</span>
+    </div>
+    <form id="projForm" class="grid2">
+      ${f("contrato", "Número de contrato", p.contrato)}
+      ${f("valor", "Valor (COP)", p.valor, "number", 'min="0" step="1000"')}
+      <label class="field" for="pf-objeto" style="grid-column:1/-1">Objeto<textarea id="pf-objeto" data-pf="objeto">${esc(p.objeto)}</textarea></label>
+      ${f("entidad", "Entidad contratante", p.entidad)}
+      ${f("contratista", "Contratista", p.contratista)}
+      ${f("interventoria", "Interventoría", p.interventoria)}
+      ${f("municipio", "Municipio", p.municipio)}
+      ${f("plazoDias", "Plazo de ejecución (días calendario)", p.plazoDias, "number", 'min="1"')}
+      ${f("plazoRespuesta", "Plazo de respuesta a solicitudes (días hábiles)", p.plazoRespuesta, "number", 'min="1" max="30"')}
+      ${f("residente", "Residente de obra (firma del contratista)", p.residente)}
+      ${f("interventor", "Interventor residente", p.interventor)}
+      ${f("supervisor", "Supervisor de la entidad", p.supervisor)}
+      ${["critica", "mayor", "menor"].map(k => `<label class="field" for="pf-nc-${k}">Plazo de corrección NC ${SEVERIDAD[k].toLowerCase()} (días hábiles)<input id="pf-nc-${k}" data-pfnc="${k}" type="number" min="1" max="60" value="${p.plazosNC[k]}"></label>`).join("")}
+      <div class="row" style="grid-column:1/-1"><button class="btn primary" type="submit">Guardar datos</button></div>
+    </form>
+  </section>
+  <section class="panel no-print">
+    <h3>Datos de este dispositivo</h3>
+    <p class="small muted">El prototipo guarda la información en este navegador y funciona sin conexión. La versión de producción sincronizará con un servidor para que todas las partes vean la misma bitácora.</p>
+    <div class="row"><button class="btn" data-reset>Restablecer proyecto de ejemplo</button>${p.ejemplo ? "" : `<button class="btn" data-delete>Eliminar este proyecto</button>`}</div>
+  </section>`;
+}
+
+/* ---------- PDF automáticos (M6) ---------- */
+function imgSize(src) { return new Promise(res => { const i = new Image(); i.onload = () => res([i.naturalWidth, i.naturalHeight]); i.onerror = () => res([4, 3]); i.src = src; }); }
+const imgFmt = src => /^data:image\/png/.test(src) ? "PNG" : "JPEG";
+async function deliverPDF(doc, filename) {
+  if (!framed) { doc.save(filename); return toast("PDF generado: " + filename); }
+  const dl = window.claude && window.claude.use ? await window.claude.use("downloads") : null;
+  if (!dl) return toast("Este visor no permite descargar archivos. Use la versión local de la aplicación.");
+  try { await dl.save({ filename, data: doc.output("blob") }); toast("PDF guardado: " + filename); }
+  catch (e) { if (e && e.code === "declined") return; toast(e && e.code === "rate_limited" ? "Ya hay una descarga pendiente de confirmar." : "No se pudo guardar el PDF en este visor."); }
+}
+// Documento base: carta, márgenes de 15 mm, encabezado con logo de la interventoría y pie con fecha y paginación.
+async function newPDF(p, titulo, subtitulo) {
+  if (!window.jspdf) { toast("No se pudo cargar el generador de PDF. Revise la conexión y recargue."); return null; }
+  const doc = new window.jspdf.jsPDF({ unit: "mm", format: "letter", compress: true });
+  const W = 215.9, H = 279.4, M = 15;
+  const logo = p.logo ? { src: p.logo, size: await imgSize(p.logo) } : null;
+  const ctx = { doc, p, W, H, M, y: 0, titulo, subtitulo, logo, generado: Date.now() };
+  header(ctx);
+  return ctx;
+}
+function header(c) {
+  const { doc, p, W, M } = c;
+  let x = M;
+  if (c.logo) {
+    const [w, h] = c.logo.size; const s = Math.min(38 / w, 18 / h);
+    doc.addImage(c.logo.src, imgFmt(c.logo.src), M, 10, w * s, h * s); x = M + w * s + 6;
+  }
+  doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.setTextColor(24, 34, 43);
+  doc.text(p.interventoria || "Interventoría", x, 14);
+  doc.setFont("helvetica", "normal"); doc.setFontSize(8.5); doc.setTextColor(91, 104, 117);
+  doc.text(doc.splitTextToSize(`Contrato ${p.contrato} · ${p.entidad}`, W - x - M - 52).slice(0, 2), x, 19);
+  doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.setTextColor(31, 79, 143);
+  doc.text(c.titulo, W - M, 14, { align: "right" });
+  doc.setFont("helvetica", "normal"); doc.setFontSize(8.5); doc.setTextColor(91, 104, 117);
+  if (c.subtitulo) doc.text(c.subtitulo, W - M, 19, { align: "right" });
+  doc.setDrawColor(31, 79, 143); doc.setLineWidth(0.5); doc.line(M, 30, W - M, 30);
+  c.y = 37;
+}
+function ensure(c, h) { if (c.y + h > c.H - 20) { c.doc.addPage(); header(c); } }
+function footers(c) {
+  const { doc, W, H, M } = c; const n = doc.getNumberOfPages();
+  for (let i = 1; i <= n; i++) {
+    doc.setPage(i); doc.setDrawColor(211, 218, 224); doc.setLineWidth(0.2); doc.line(M, H - 14, W - M, H - 14);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(91, 104, 117);
+    doc.text(`Generado con BitaObra el ${fmtDateTime(c.generado)}`, M, H - 9);
+    doc.text(`Página ${i} de ${n}`, W - M, H - 9, { align: "right" });
+  }
+}
+function h2(c, t) { ensure(c, 12); c.doc.setFont("helvetica", "bold"); c.doc.setFontSize(11); c.doc.setTextColor(24, 34, 43); c.doc.text(t, c.M, c.y); c.y += 6; }
+function para(c, t, opt = {}) {
+  if (!t) return;
+  const { doc, W, M } = c; const size = opt.size || 9.5;
+  doc.setFont("helvetica", opt.bold ? "bold" : "normal"); doc.setFontSize(size); doc.setTextColor(...(opt.color || [24, 34, 43]));
+  const lines = doc.splitTextToSize(String(t), W - 2 * M - (opt.indent || 0));
+  for (const ln of lines) { ensure(c, size * 0.45); doc.text(ln, M + (opt.indent || 0), c.y); c.y += size * 0.45; }
+  c.y += opt.after ?? 2;
+}
+// Tabla de pares etiqueta / valor en dos columnas.
+function fields(c, pairs) {
+  const { doc, W, M } = c; const colW = (W - 2 * M) / 2;
+  for (let i = 0; i < pairs.length; i += 2) {
+    const row = pairs.slice(i, i + 2);
+    const blocks = row.map(([k, v]) => doc.splitTextToSize(String(v ?? "—"), colW - 4));
+    const h = 5 + Math.max(...blocks.map(b => b.length)) * 4.2;
+    ensure(c, h);
+    row.forEach(([k], j) => {
+      const x = M + j * colW;
+      doc.setFont("helvetica", "bold"); doc.setFontSize(7); doc.setTextColor(91, 104, 117); doc.text(k.toUpperCase(), x, c.y);
+      doc.setFont("helvetica", "normal"); doc.setFontSize(9.5); doc.setTextColor(24, 34, 43); doc.text(blocks[j], x, c.y + 4.5);
+    });
+    c.y += h + 1.5;
+  }
+}
+async function photos(c, evid) {
+  if (!evid || !evid.length) return;
+  const { doc, W, M } = c; const colW = (W - 2 * M - 6) / 2;
+  for (let i = 0; i < evid.length; i += 2) {
+    const row = evid.slice(i, i + 2);
+    const sizes = await Promise.all(row.map(v => imgSize(v.img)));
+    const hs = sizes.map(([w, h]) => Math.min(colW * h / w, 70));
+    const rowH = Math.max(...hs) + 10;
+    ensure(c, rowH);
+    row.forEach((v, j) => {
+      const [w, h] = sizes[j]; const ih = hs[j]; const iw = ih * w / h; const x = M + j * (colW + 6);
+      doc.addImage(v.img, imgFmt(v.img), x, c.y, iw, ih);
+      doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(91, 104, 117);
+      doc.text(`Foto: ${fmtDateTime(v.at)}${v.lat != null ? ` · GPS ${v.lat.toFixed(5)}, ${v.lon.toFixed(5)}` : " · sin ubicación"}`, x, c.y + ih + 4);
+    });
+    c.y += rowH;
+  }
+}
+async function signatures(c, firmas) {
+  const list = firmas.filter(Boolean);
+  if (!list.length) return;
+  const { doc, W, M } = c; const colW = (W - 2 * M) / 3;
+  ensure(c, 34);
+  for (let i = 0; i < list.length; i++) {
+    const f = list[i]; const x = M + (i % 3) * colW;
+    if (i && i % 3 === 0) { c.y += 34; ensure(c, 34); }
+    const [w, h] = await imgSize(f.img); const s = Math.min((colW - 8) / w, 16 / h);
+    doc.addImage(f.img, imgFmt(f.img), x, c.y, w * s, h * s);
+    doc.setDrawColor(24, 34, 43); doc.setLineWidth(0.3); doc.line(x, c.y + 18, x + colW - 8, c.y + 18);
+    doc.setFont("helvetica", "bold"); doc.setFontSize(8.5); doc.setTextColor(24, 34, 43); doc.text(f.nombre, x, c.y + 22);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(91, 104, 117);
+    doc.text(`${f.rol ? f.rol + " · " : ""}firmó ${fmtDateTime(f.at)}`, x, c.y + 26);
+  }
+  c.y += 32;
+}
+function entryTitle(p, e) {
+  let t = `Folio ${String(e.folio).padStart(3, "0")} · ${TIPOS[e.tipo].nombre}`;
+  if (e.refFolio) t += ` (folio ${e.refFolio})`;
+  return t;
+}
+async function entryBlock(c, e) {
+  const p = c.p;
+  ensure(c, 30);
+  c.doc.setFillColor(227, 236, 247); c.doc.rect(c.M, c.y - 4.5, c.W - 2 * c.M, 7, "F");
+  h2(c, entryTitle(p, e));
+  const pairs = [["Fecha de los hechos", fmtDate(e.fechaHechos)], ["Registrado", fmtDateTime(e.registradoAt)], ["Autor", `${e.autorNombre} (${ROLES[e.autorRol].nombre})`]];
+  if (e.tipo === "diario") pairs.push(["Clima", e.clima || "—"], ["Personal en obra", e.personal || "—"], ["Equipos", e.equipos || "—"]);
+  if (e.solicitud) { const s = solicitudEstado(p, e); pairs.push(["Categoría", e.solicitud.categoria], ["Vence", fmtDate(e.solicitud.venceAt)], ["Estado", s.texto]); }
+  if (e.nc) { const s = ncEstado(p, e); pairs.push(["Requisito incumplido", e.nc.requisito], ["Severidad", SEVERIDAD[e.nc.severidad]], ["Corregir antes de", fmtDate(e.nc.venceAt)], ["Estado", s.texto]); }
+  if (e.tipo === "respuesta") pairs.push(["Decisión", e.decision || "—"]);
+  if (e.tipo === "cierreNC") pairs.push(["Resultado", e.eficaz ? "Corrección eficaz" : "Corrección no eficaz"]);
+  fields(c, pairs);
+  if (e.tipo === "diario") { para(c, "Actividades ejecutadas", { bold: true, size: 9, after: 1 }); para(c, e.actividades); }
+  if (e.texto) { para(c, e.tipo === "diario" ? "Observaciones" : "Descripción", { bold: true, size: 9, after: 1 }); para(c, e.texto); }
+  if ((e.evidencias || []).length) { para(c, `Registro fotográfico (${e.evidencias.length})`, { bold: true, size: 9, after: 2 }); await photos(c, e.evidencias); }
+  if (e.firma) await signatures(c, [{ ...e.firma, rol: ROLES[e.autorRol].nombre }]);
+  para(c, `Huella SHA-256: ${e.hash}`, { size: 7, color: [91, 104, 117], after: 6 });
+}
+async function pdfActa(p) {
+  const a = p.acta;
+  const c = await newPDF(p, "ACTA DE INICIO", a.suscrita ? `Suscrita el ${fmtDate(a.fechaInicio)}` : "BORRADOR · sin suscribir");
+  if (!c) return;
+  fields(c, [["Contrato", p.contrato], ["Valor", fmtMoney(p.valor)], ["Entidad contratante", p.entidad], ["Contratista", p.contratista], ["Interventoría", p.interventoria], ["Municipio", p.municipio || "—"],
+    ["Plazo de ejecución", `${p.plazoDias} días calendario`], ["Fecha de inicio", a.suscrita ? fmtDate(a.fechaInicio) : "Pendiente"],
+    ["Fecha de terminación prevista", a.suscrita ? fmtDate(a.fechaInicio + p.plazoDias * DAY) : "Pendiente"], ["Plazo de respuesta a solicitudes", `${p.plazoRespuesta} días hábiles`],
+    ["Plazos de corrección de no conformidades", `Crítica ${p.plazosNC.critica}, mayor ${p.plazosNC.mayor}, menor ${p.plazosNC.menor} días hábiles`]]);
+  para(c, "Objeto", { bold: true, size: 9, after: 1 }); para(c, p.objeto, { after: 4 });
+  h2(c, "Verificación de requisitos previos");
+  REQUISITOS.forEach(([k, t, n]) => para(c, `[${a.checks[k] ? "X" : "  "}] ${t} (${n})`, { size: 9, after: 1 }));
+  c.y += 3;
+  para(c, a.suscrita ? `Verificados los requisitos anteriores, las partes acuerdan dar inicio a la ejecución del contrato el ${fmtDate(a.fechaInicio)}. Los plazos de respuesta y de corrección aquí pactados rigen la bitácora de obra.` : "Documento en borrador: el acta aún no ha sido firmada por todas las partes.", { after: 6 });
+  h2(c, "Firmas");
+  await signatures(c, ["contratista", "interventor", "entidad"].map(r => a.firmas[r] && { ...a.firmas[r], rol: ROLES[r].nombre }));
+  footers(c);
+  await deliverPDF(c.doc, `acta-de-inicio-${p.contrato || "proyecto"}.pdf`);
+}
+async function pdfFolio(p, folio) {
+  const e = p.asientos.find(x => x.folio === folio);
+  const c = await newPDF(p, "BITÁCORA DE OBRA", `Folio ${String(folio).padStart(3, "0")} · ${fmtDate(e.fechaHechos)}`);
+  if (!c) return;
+  await entryBlock(c, e);
+  footers(c);
+  await deliverPDF(c.doc, `bitacora-${p.contrato || "proyecto"}-folio-${String(folio).padStart(3, "0")}.pdf`);
+}
+async function pdfPeriodo(p, desde, hasta) {
+  const list = p.asientos.filter(e => isoDay(e.fechaHechos) >= desde && isoDay(e.fechaHechos) <= hasta);
+  if (!list.length) return toast("No hay folios con hechos en esas fechas.");
+  const unDia = desde === hasta;
+  const c = await newPDF(p, unDia ? "INFORME DIARIO DE OBRA" : "INFORME DE BITÁCORA", unDia ? fmtDate(desde + "T12:00") : `${fmtDate(desde + "T12:00")} a ${fmtDate(hasta + "T12:00")}`);
+  if (!c) return;
+  para(c, p.objeto, { after: 3 });
+  const ind = indicadores(p);
+  const fotos = list.reduce((a, e) => a + (e.evidencias || []).length, 0);
+  fields(c, [["Folios incluidos", `${list.length} (${list[0].folio} a ${list[list.length - 1].folio})`], ["Fotos", fotos],
+    ["Tiempo de respuesta (mediana / P90)", `${dias(ind.mediana)} / ${dias(ind.p90)} días hábiles`], ["Cumplimiento del plazo de respuesta", ind.pctATiempo == null ? "—" : Math.round(ind.pctATiempo * 100) + " %"],
+    ["Solicitudes vencidas", ind.vencidas], ["No conformidades abiertas", `${ind.ncAbiertas} (${ind.ncCriticas} críticas)`]]);
+  c.y += 2;
+  for (const e of list) await entryBlock(c, e);
+  footers(c);
+  await deliverPDF(c.doc, unDia ? `informe-diario-${p.contrato || "proyecto"}-${desde}.pdf` : `informe-bitacora-${p.contrato || "proyecto"}-${desde}-a-${hasta}.pdf`);
+}
+async function runPDF(btn, fn) {
+  const old = btn.textContent; btn.disabled = true; btn.textContent = "Generando PDF…";
+  try { await fn(); } catch (e) { console.error(e); toast("No se pudo generar el PDF."); }
+  finally { btn.disabled = false; btn.textContent = old; }
+}
+
+/* ---------- diálogos ---------- */
+function openDialog(html, onMount) {
+  const L = $("#layer");
+  L.innerHTML = `<div class="dialog-back" role="dialog" aria-modal="true"><div class="dialog">${html}</div></div>`;
+  const back = L.firstElementChild;
+  back.addEventListener("click", ev => { if (ev.target === back) closeDialog(); });
+  back.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click", closeDialog));
+  onMount && onMount(back);
+  const first = back.querySelector("input,textarea,select,button"); first && first.focus();
+}
+function closeDialog() { $("#layer").innerHTML = ""; }
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeDialog(); });
+
+function signaturePad(canvas) {
+  const ctx = canvas.getContext("2d");
+  let drawing = false, dirty = false;
+  const fit = () => { const r = canvas.getBoundingClientRect(); canvas.width = r.width * 2; canvas.height = r.height * 2; ctx.scale(2, 2); ctx.lineWidth = 2.2; ctx.lineCap = "round"; ctx.strokeStyle = "#173a73"; ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, r.width, r.height); };
+  fit();
+  const pos = e => { const r = canvas.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+  canvas.addEventListener("pointerdown", e => { drawing = true; canvas.setPointerCapture(e.pointerId); const [x, y] = pos(e); ctx.beginPath(); ctx.moveTo(x, y); });
+  canvas.addEventListener("pointermove", e => { if (!drawing) return; const [x, y] = pos(e); ctx.lineTo(x, y); ctx.stroke(); dirty = true; });
+  canvas.addEventListener("pointerup", () => drawing = false);
+  return { isEmpty: () => !dirty, clear: () => { dirty = false; fit(); }, data: () => canvas.toDataURL("image/png") };
+}
+const padHTML = (who) => `<div class="pad-wrap"><span class="label">Firma de ${esc(who)}</span><canvas class="pad" id="pad"></canvas><div class="row"><button type="button" class="btn small" id="padClear">Borrar firma</button><span class="small muted">Firme con el dedo o el mouse.</span></div></div>`;
+
+function signerName(p) { return p[ROLES[state.role].campo] || ROLES[state.role].nombre; }
+
+function dlgSignActa(p, rol) {
+  const nombre = p[ROLES[rol].campo] || ROLES[rol].nombre;
+  openDialog(`<h3>Firmar acta de inicio</h3><p class="small muted">Al firmar, ${esc(nombre)} declara verificados los requisitos previos. Cuando firmen contratista e interventoría, el acta queda suscrita y empieza a correr el plazo.</p>${padHTML(nombre)}
+    <div class="row"><button class="btn primary" id="ok">Firmar</button><button class="btn" data-close>Cancelar</button></div>`, root => {
+    const pad = signaturePad($("#pad", root));
+    $("#padClear", root).onclick = pad.clear;
+    $("#ok", root).onclick = () => {
+      if (pad.isEmpty()) return toast("Dibuje la firma antes de continuar.");
+      p.acta.firmas[rol] = { nombre, img: pad.data(), at: Date.now() };
+      if (p.acta.firmas.contratista && p.acta.firmas.interventor && !p.acta.suscrita) {
+        p.acta.suscrita = true; p.acta.fechaInicio = Date.now();
+        toast("Acta suscrita. El plazo contractual empezó a correr y la bitácora quedó habilitada.");
+      } else toast("Firma registrada.");
+      save(); closeDialog(); render();
+    };
+  });
+}
+
+function readImage(file) {
+  return new Promise((res, rej) => {
+    const fr = new FileReader();
+    fr.onload = () => { const img = new Image(); img.onload = () => { const s = Math.min(1, 900 / Math.max(img.width, img.height)); const c = document.createElement("canvas"); c.width = img.width * s; c.height = img.height * s; c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); res(c.toDataURL("image/jpeg", 0.7)); }; img.onerror = rej; img.src = fr.result; };
+    fr.onerror = rej; fr.readAsDataURL(file);
+  });
+}
+function getPosition() {
+  return new Promise(res => {
+    if (!navigator.geolocation) return res(null);
+    try { navigator.geolocation.getCurrentPosition(p => res({ lat: p.coords.latitude, lon: p.coords.longitude }), () => res(null), { timeout: 6000, maximumAge: 60000 }); }
+    catch (e) { res(null); }
+  });
+}
+
+function dlgEntry(p, tipo, refFolio = null) {
+  const t = TIPOS[tipo];
+  const who = signerName(p);
+  const ref = refFolio ? p.asientos.find(e => e.folio === refFolio) : null;
+  const evid = [];
+  openDialog(`<h3>${t.nombre}${ref ? ` · folio ${ref.folio}` : ""}</h3>
+    <p class="small muted">Fecha y hora de registro automáticas. Una vez firmado, el asiento no se puede modificar; las correcciones se hacen con un asiento de aclaración.</p>
+    <form id="ef" class="grid2">
+      <label class="field" for="ef-fecha">Fecha de los hechos<input type="date" id="ef-fecha" value="${isoDay(Date.now())}" max="${isoDay(Date.now())}"></label>
+      ${tipo === "diario" ? `
+        <label class="field" for="ef-clima">Clima<select id="ef-clima"><option value="">Seleccione</option>${CLIMA.map(c => `<option>${c}</option>`).join("")}</select></label>
+        <label class="field" for="ef-personal">Personal en obra<input type="number" id="ef-personal" min="0" inputmode="numeric"></label>
+        <label class="field" for="ef-equipos">Equipos<input id="ef-equipos" placeholder="Ej.: mezcladora, vibrador"></label>
+        <label class="field" for="ef-act" style="grid-column:1/-1">Actividades ejecutadas y cantidades<textarea id="ef-act" required></textarea></label>
+        <label class="field" for="ef-txt" style="grid-column:1/-1">Observaciones (opcional)<textarea id="ef-txt"></textarea></label>` : ""}
+      ${tipo === "solicitud" ? `<label class="field" for="ef-cat">Categoría<select id="ef-cat">${CATEGORIAS.map(c => `<option>${c}</option>`).join("")}</select></label>
+        <div class="field small muted" style="align-self:end">Vence en ${p.plazoRespuesta} días hábiles: ${fmtDate(addBusinessDays(Date.now(), p.plazoRespuesta))}</div>` : ""}
+      ${tipo === "noConformidad" ? `<label class="field" for="ef-req" style="grid-column:1/-1">Requisito incumplido (norma, especificación, plano o cláusula)<input id="ef-req" required placeholder="Ej.: NSR-10 C.5.11 curado del concreto"></label>
+        <label class="field" for="ef-sev">Severidad<select id="ef-sev">${Object.entries(SEVERIDAD).map(([k, n]) => `<option value="${k}" ${k === "mayor" ? "selected" : ""}>${n} (${p.plazosNC[k]} días háb.)</option>`).join("")}</select></label>
+        <div class="field small muted" style="align-self:end" id="ef-sev-vence"></div>` : ""}
+      ${tipo === "correccion" && ref ? `<div class="small" style="grid-column:1/-1"><span class="muted">No conformidad:</span> ${esc(ref.nc.requisito)} · ${esc(ref.texto)}</div>` : ""}
+      ${tipo !== "diario" ? `<label class="field" for="ef-txt" style="grid-column:1/-1">${tipo === "solicitud" ? "Descripción de la solicitud" : tipo === "orden" ? "Orden impartida" : tipo === "aclaracion" ? "Aclaración" : tipo === "noConformidad" ? "Hallazgo" : tipo === "correccion" ? "Corrección realizada y acción correctiva para que no se repita" : "Descripción"}<textarea id="ef-txt" required></textarea></label>` : ""}
+      <div class="field" style="grid-column:1/-1"><span>Evidencias fotográficas</span>
+        <div class="row"><label class="btn" for="ef-cam">Tomar foto</label><input type="file" id="ef-cam" accept="image/*" capture="environment" hidden>
+        <label class="btn" for="ef-files">Adjuntar fotos</label><input type="file" id="ef-files" accept="image/*" multiple hidden>
+        <span class="small muted">«Tomar foto» abre la cámara del celular; «Adjuntar fotos» toma imágenes ya guardadas.</span></div></div>
+      <div class="thumbs" id="ef-thumbs" style="grid-column:1/-1"></div>
+      <div style="grid-column:1/-1">${padHTML(who)}</div>
+      <div class="row" style="grid-column:1/-1"><button class="btn primary" type="submit">Firmar y registrar</button><button class="btn" type="button" data-close>Cancelar</button></div>
+    </form>`, root => {
+    const pad = signaturePad($("#pad", root));
+    $("#padClear", root).onclick = pad.clear;
+    const sev = $("#ef-sev", root);
+    if (sev) { const upd = () => $("#ef-sev-vence", root).textContent = "Corregir antes de " + fmtDate(addBusinessDays(Date.now(), p.plazosNC[sev.value])); sev.onchange = upd; upd(); }
+    const addFiles = async ev => {
+      const pos = await getPosition();
+      for (const file of ev.target.files) {
+        try { const img = await readImage(file); evid.push({ img, at: Date.now(), lat: pos?.lat ?? null, lon: pos?.lon ?? null, nombre: file.name }); }
+        catch (e) { toast("No se pudo leer " + file.name); }
+      }
+      $("#ef-thumbs", root).innerHTML = evid.map(v => `<figure class="thumb" style="margin:0"><img src="${v.img}" alt=""><figcaption>${v.lat != null ? "Con ubicación" : "Sin ubicación"}</figcaption></figure>`).join("");
+      ev.target.value = "";
+    };
+    $("#ef-files", root).addEventListener("change", addFiles);
+    $("#ef-cam", root).addEventListener("change", addFiles);
+    $("#ef", root).addEventListener("submit", ev => {
+      ev.preventDefault();
+      if (pad.isEmpty()) return toast("Firme el asiento antes de registrarlo.");
+      const now = Date.now();
+      const fh = $("#ef-fecha", root).value;
+      const fechaHechos = fh === isoDay(now) ? now : new Date(fh + "T12:00").getTime();
+      const e = { tipo, autorRol: state.role, autorNombre: who, fechaHechos, registradoAt: now, texto: ($("#ef-txt", root)?.value || "").trim(), evidencias: evid };
+      if (tipo === "diario") Object.assign(e, { clima: $("#ef-clima", root).value, personal: $("#ef-personal", root).value, equipos: $("#ef-equipos", root).value.trim(), actividades: $("#ef-act", root).value.trim() });
+      if (tipo === "solicitud") e.solicitud = { categoria: $("#ef-cat", root).value, plazo: p.plazoRespuesta, venceAt: addBusinessDays(now, p.plazoRespuesta) };
+      if (tipo === "noConformidad") { const sv = $("#ef-sev", root).value; e.nc = { requisito: $("#ef-req", root).value.trim(), severidad: sv, plazo: p.plazosNC[sv], venceAt: addBusinessDays(now, p.plazosNC[sv]) }; }
+      if (ref) e.refFolio = ref.folio;
+      e.folio = p.asientos.length + 1;
+      e.firma = { nombre: who, img: pad.data(), at: now };
+      sealEntry(p, e); p.asientos.push(e);
+      if (tipo === "correccion") ref.nc.correccionFolio = e.folio;
+      save(); closeDialog(); render();
+      toast(`Folio ${e.folio} registrado y firmado.`);
+    });
+  });
+}
+
+function dlgRespond(p, folio) {
+  const sol = p.asientos.find(e => e.folio === folio);
+  const s = solicitudEstado(p, sol);
+  const who = signerName(p);
+  openDialog(`<h3>Responder solicitud · folio ${folio}</h3>
+    <div class="row small"><span class="pill ${s.clase}">${s.texto}</span><span class="muted">${esc(sol.solicitud.categoria)} · vence ${fmtDateTime(sol.solicitud.venceAt)}</span></div>
+    <p class="text" style="white-space:pre-wrap">${esc(sol.texto)}</p>
+    <form id="rf" class="grid2">
+      <label class="field" for="rf-dec">Decisión<select id="rf-dec"><option>Aprobada</option><option>Rechazada</option><option>Aprobada con condiciones</option><option>Información</option></select></label>
+      <label class="field" for="rf-txt" style="grid-column:1/-1">Respuesta motivada<textarea id="rf-txt" required></textarea></label>
+      <div style="grid-column:1/-1">${padHTML(who)}</div>
+      <div class="row" style="grid-column:1/-1"><button class="btn primary" type="submit">Firmar respuesta</button><button class="btn" type="button" data-close>Cancelar</button></div>
+    </form>`, root => {
+    const pad = signaturePad($("#pad", root));
+    $("#padClear", root).onclick = pad.clear;
+    $("#rf", root).addEventListener("submit", ev => {
+      ev.preventDefault();
+      if (pad.isEmpty()) return toast("Firme la respuesta antes de registrarla.");
+      const now = Date.now();
+      const e = { tipo: "respuesta", autorRol: "interventor", autorNombre: who, fechaHechos: now, registradoAt: now, texto: $("#rf-txt", root).value.trim(), decision: $("#rf-dec", root).value, refFolio: folio, evidencias: [] };
+      e.folio = p.asientos.length + 1;
+      e.firma = { nombre: who, img: pad.data(), at: now };
+      sealEntry(p, e); p.asientos.push(e);
+      sol.solicitud.respuestaFolio = e.folio;
+      save(); closeDialog(); render();
+      const d = businessDaysBetween(sol.registradoAt, now);
+      toast(`Respuesta registrada en el folio ${e.folio}, a los ${d.toFixed(1).replace(".", ",")} días hábiles.`);
+    });
+  });
+}
+
+function dlgVerifyNC(p, folio) {
+  const nc = p.asientos.find(e => e.folio === folio);
+  const corr = p.asientos.find(e => e.folio === nc.nc.correccionFolio);
+  const who = signerName(p);
+  openDialog(`<h3>Verificar corrección · folio ${folio}</h3>
+    <p class="small"><span class="muted">Requisito:</span> ${esc(nc.nc.requisito)}</p>
+    <p class="small"><span class="muted">Corrección (folio ${corr.folio}):</span> ${esc(corr.texto)}</p>
+    <form id="vf" class="grid2">
+      <label class="field" for="vf-ef">Resultado de la verificación en campo<select id="vf-ef"><option value="1">Corrección eficaz: cerrar la no conformidad</option><option value="0">Corrección no eficaz: el contratista debe corregir de nuevo</option></select></label>
+      <label class="field" for="vf-txt" style="grid-column:1/-1">Observaciones de la verificación<textarea id="vf-txt" required></textarea></label>
+      <div style="grid-column:1/-1">${padHTML(who)}</div>
+      <div class="row" style="grid-column:1/-1"><button class="btn primary" type="submit">Firmar verificación</button><button class="btn" type="button" data-close>Cancelar</button></div>
+    </form>`, root => {
+    const pad = signaturePad($("#pad", root));
+    $("#padClear", root).onclick = pad.clear;
+    $("#vf", root).addEventListener("submit", ev => {
+      ev.preventDefault();
+      if (pad.isEmpty()) return toast("Firme la verificación antes de registrarla.");
+      const now = Date.now();
+      const eficaz = $("#vf-ef", root).value === "1";
+      const e = { tipo: "cierreNC", autorRol: "interventor", autorNombre: who, fechaHechos: now, registradoAt: now, texto: $("#vf-txt", root).value.trim(), refFolio: folio, eficaz, evidencias: [] };
+      e.folio = p.asientos.length + 1;
+      e.firma = { nombre: who, img: pad.data(), at: now };
+      sealEntry(p, e); p.asientos.push(e);
+      if (eficaz) nc.nc.cierreFolio = e.folio; else nc.nc.correccionFolio = null;
+      save(); closeDialog(); render();
+      toast(eficaz ? `No conformidad cerrada en el folio ${e.folio}.` : `Corrección rechazada en el folio ${e.folio}. La no conformidad sigue abierta.`);
+    });
+  });
+}
+
+function dlgMejora(p, indicador, valor) {
+  const nombre = { IR1: "Tiempo de respuesta", IR2: "Cumplimiento del plazo de respuesta", IP1: "Solicitudes vencidas", IP2: "Antigüedad del atraso", INC1: "No conformidades abiertas", INC2: "Cierre oportuno de NC", INC3: "Reincidencia", IO1: "Registro el mismo día", IO2: "Completitud del registro", IO3: "Días sin registro" }[indicador];
+  openDialog(`<h3>Acción de mejora · ${esc(indicador)}</h3>
+    <p class="small muted">${esc(nombre)}: valor detectado ${esc(valor)}. Pregunte «¿por qué?» hasta llegar a una causa que la interventoría pueda controlar.</p>
+    <form id="mf" class="grid2">
+      <label class="field" for="mf-causa" style="grid-column:1/-1">Causa identificada<textarea id="mf-causa" required></textarea></label>
+      <label class="field" for="mf-acc" style="grid-column:1/-1">Acción de mejora<textarea id="mf-acc" required></textarea></label>
+      <label class="field" for="mf-resp">Responsable<input id="mf-resp" required value="${esc(p.interventor)}"></label>
+      <label class="field" for="mf-fecha">Fecha de compromiso<input id="mf-fecha" type="date" required value="${isoDay(addBusinessDays(Date.now(), 5))}"></label>
+      <div class="row" style="grid-column:1/-1"><button class="btn primary" type="submit">Registrar acción</button><button class="btn" type="button" data-close>Cancelar</button></div>
+    </form>`, root => {
+    $("#mf", root).addEventListener("submit", ev => {
+      ev.preventDefault();
+      p.mejoras.push({ id: uid(), indicador, valorDetectado: valor, causa: $("#mf-causa", root).value.trim(), accion: $("#mf-acc", root).value.trim(), responsable: $("#mf-resp", root).value.trim(), fechaCompromiso: $("#mf-fecha", root).value, criterioEficacia: `${indicador} vuelve a la meta en el ciclo siguiente`, estado: "abierta", creadaAt: Date.now(), verificadaAt: null });
+      save(); closeDialog(); render(); toast("Acción de mejora registrada.");
+    });
+  });
+}
+
+function dlgNewProject() {
+  openDialog(`<h3>Nuevo proyecto</h3><form id="np" class="grid2">
+    <label class="field" for="np-c">Número de contrato<input id="np-c" required></label>
+    <label class="field" for="np-v">Valor (COP)<input id="np-v" type="number" min="0" required></label>
+    <label class="field" for="np-o" style="grid-column:1/-1">Objeto<textarea id="np-o" required></textarea></label>
+    <label class="field" for="np-pz">Plazo (días calendario)<input id="np-pz" type="number" min="1" value="120" required></label>
+    <label class="field" for="np-pr">Plazo de respuesta (días hábiles)<input id="np-pr" type="number" min="1" max="30" value="3" required></label>
+    <p class="small muted" style="grid-column:1/-1">Las partes y los nombres de los firmantes se completan en la pestaña Proyecto.</p>
+    <div class="row" style="grid-column:1/-1"><button class="btn primary" type="submit">Crear proyecto</button><button class="btn" type="button" data-close>Cancelar</button></div>
+  </form>`, root => {
+    $("#np", root).addEventListener("submit", ev => {
+      ev.preventDefault();
+      const p = blankProject({ contrato: $("#np-c", root).value.trim(), valor: +$("#np-v", root).value, objeto: $("#np-o", root).value.trim(), plazoDias: +$("#np-pz", root).value, plazoRespuesta: +$("#np-pr", root).value });
+      state.projects.push(p); state.current = p.id; state.tab = "proyecto"; save(); closeDialog(); render();
+      toast("Proyecto creado. Complete las partes y los firmantes.");
+    });
+  });
+}
+
+function dlgConfirm(msg, label, fn) {
+  openDialog(`<h3>${esc(label)}</h3><p>${esc(msg)}</p><div class="row"><button class="btn primary" id="ok">${esc(label)}</button><button class="btn" data-close>Cancelar</button></div>`, root => { $("#ok", root).onclick = () => { closeDialog(); fn(); }; });
+}
+
+/* ---------- eventos ---------- */
+function bindView(p) {
+  const v = $("#view");
+  v.querySelectorAll("[data-go]").forEach(b => b.onclick = () => setTab(b.dataset.go));
+  v.querySelectorAll("[data-check]").forEach(c => c.onchange = () => { p.acta.checks[c.dataset.check] = c.checked; save(); render(); });
+  v.querySelectorAll("[data-sign-acta]").forEach(b => b.onclick = () => dlgSignActa(p, b.dataset.signActa));
+  v.querySelectorAll("[data-new]").forEach(b => b.onclick = () => dlgEntry(p, b.dataset.new));
+  v.querySelectorAll("[data-clarify]").forEach(b => b.onclick = () => dlgEntry(p, "aclaracion", +b.dataset.clarify));
+  v.querySelectorAll("[data-respond]").forEach(b => b.onclick = () => dlgRespond(p, +b.dataset.respond));
+  v.querySelectorAll("[data-correct]").forEach(b => b.onclick = () => dlgEntry(p, "correccion", +b.dataset.correct));
+  v.querySelectorAll("[data-verify]").forEach(b => b.onclick = () => dlgVerifyNC(p, +b.dataset.verify));
+  v.querySelectorAll("[data-mejora]").forEach(b => b.onclick = () => dlgMejora(p, b.dataset.mejora, b.dataset.valor));
+  v.querySelectorAll("[data-mej-ok],[data-mej-no]").forEach(b => b.onclick = () => {
+    const m = p.mejoras.find(x => x.id === (b.dataset.mejOk || b.dataset.mejNo));
+    m.estado = b.dataset.mejOk ? "eficaz" : "no eficaz"; m.verificadaAt = Date.now(); save(); render();
+    toast(m.estado === "eficaz" ? "Acción cerrada como eficaz." : "Acción marcada como no eficaz. Reabra el análisis de causa.");
+  });
+  const flt = $("#fltSel"); if (flt) flt.onchange = () => { state.filter = flt.value; save(); render(); };
+  ["rDesde", "rHasta"].forEach(id => { const el = $("#" + id); if (el) el.onchange = () => { state[id] = el.value; save(); render(); }; });
+  v.querySelectorAll("[data-pdf-folio]").forEach(b => b.onclick = () => runPDF(b, () => pdfFolio(p, +b.dataset.pdfFolio)));
+  const pa = v.querySelector("[data-pdf-acta]"); if (pa) pa.onclick = () => runPDF(pa, () => pdfActa(p));
+  const pdia = v.querySelector("[data-pdf-dia]"); if (pdia) pdia.onclick = () => { const d = $("#diaPDF").value; state.diaPDF = d; save(); runPDF(pdia, () => pdfPeriodo(p, d, d)); };
+  const pper = v.querySelector("[data-pdf-periodo]"); if (pper) pper.onclick = () => runPDF(pper, () => pdfPeriodo(p, $("#rDesde").value, $("#rHasta").value));
+  const lf = $("#logoFile"); if (lf) lf.onchange = async () => {
+    const f = lf.files[0]; if (!f) return;
+    try {
+      p.logo = await new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => { const img = new Image(); img.onload = () => { const s = Math.min(1, 600 / Math.max(img.width, img.height)); const cv = document.createElement("canvas"); cv.width = img.width * s; cv.height = img.height * s; cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height); res(cv.toDataURL("image/png")); }; img.onerror = rej; img.src = fr.result; }; fr.onerror = rej; fr.readAsDataURL(f); });
+      save(); render(); toast("Logo guardado. Aparecerá en los PDF.");
+    } catch (e) { toast("No se pudo leer la imagen del logo."); }
+  };
+  const ld = v.querySelector("[data-logo-del]"); if (ld) ld.onclick = () => { p.logo = null; save(); render(); toast("Logo quitado."); };
+  const ex = v.querySelector("[data-export]"); if (ex) ex.onclick = () => {
+    const blob = new Blob([JSON.stringify(p, null, 2)], { type: "application/json" });
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `bitacora-${p.contrato || p.id}.json`; a.click();
+  };
+  const imp = $("#impFile"); if (imp) imp.onchange = async () => {
+    try { const data = JSON.parse(await imp.files[0].text()); if (!data.asientos || !data.acta) throw 0; data.id = uid(); data.ejemplo = false; state.projects.push(data); state.current = data.id; save(); render(); toast(verifyChain(data).ok ? "Respaldo importado. Cadena de huellas verificada." : "Respaldo importado, pero la cadena de huellas no coincide: el archivo fue modificado."); }
+    catch (e) { toast("El archivo no es un respaldo válido de BitaObra."); }
+  };
+  const form = $("#projForm"); if (form) form.onsubmit = ev => {
+    ev.preventDefault();
+    form.querySelectorAll("[data-pf]").forEach(el => { if (el.disabled) return; const k = el.dataset.pf; p[k] = el.type === "number" ? +el.value : el.value.trim(); });
+    form.querySelectorAll("[data-pfnc]").forEach(el => { p.plazosNC[el.dataset.pfnc] = Math.max(1, +el.value || 1); });
+    save(); render(); toast("Datos del proyecto guardados.");
+  };
+  const rs = v.querySelector("[data-reset]"); if (rs) rs.onclick = () => dlgConfirm("Se reemplaza el proyecto de ejemplo por uno nuevo con fechas actualizadas. Sus proyectos propios no se tocan.", "Restablecer ejemplo", () => {
+    const keep = state.projects.filter(x => !x.ejemplo); const s = buildSample(); state.projects = [s, ...keep]; state.current = s.id; save(); render(); toast("Ejemplo restablecido.");
+  });
+  const del = v.querySelector("[data-delete]"); if (del) del.onclick = () => dlgConfirm(`Se elimina el proyecto ${p.contrato} y toda su bitácora de este dispositivo. Exporte un respaldo antes si lo necesita.`, "Eliminar proyecto", () => {
+    state.projects = state.projects.filter(x => x.id !== p.id); if (!state.projects.length) state.projects.push(buildSample()); state.current = state.projects[0].id; save(); render(); toast("Proyecto eliminado.");
+  });
+}
+$("#tabs").addEventListener("click", e => { const b = e.target.closest("button[data-tab]"); if (b) setTab(b.dataset.tab); });
+$("#roleSel").addEventListener("change", e => { state.role = e.target.value; save(); render(); toast("Ahora actúa como " + ROLES[state.role].nombre + "."); });
+$("#projSel").addEventListener("change", e => { if (e.target.value === "__new") { e.target.value = state.current; return dlgNewProject(); } state.current = e.target.value; save(); render(); });
+
+/* ---------- arranque ---------- */
+state = load();
+if (!state || !state.projects || !state.projects.length) { state = freshState(); save(); }
+else {
+  // Datos guardados por la versión anterior: el ejemplo se regenera y los proyectos propios reciben los campos nuevos.
+  state.projects = state.projects.map(x => x.ejemplo && !x.plazosNC ? buildSample() : x);
+  state.projects.forEach(x => { x.plazosNC = x.plazosNC || { critica: 1, mayor: 5, menor: 10 }; x.mejoras = x.mejoras || []; });
+  if (!state.projects.some(x => x.id === state.current)) state.current = state.projects[0].id;
+  save();
+}
+render();
+if (!framed && "serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js").catch(() => {});
+</script>
+
+</body>
+</html>
