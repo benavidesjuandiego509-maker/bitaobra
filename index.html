@@ -1558,9 +1558,27 @@ function signaturePad(canvas) {
   canvas.addEventListener("pointerdown", e => { drawing = true; canvas.setPointerCapture(e.pointerId); const [x, y] = pos(e); ctx.beginPath(); ctx.moveTo(x, y); });
   canvas.addEventListener("pointermove", e => { if (!drawing) return; const [x, y] = pos(e); ctx.lineTo(x, y); ctx.stroke(); if (!dirty) canvas.classList.add("inked"); dirty = true; });
   canvas.addEventListener("pointerup", () => drawing = false);
+  // Firma escaneada o fotografiada: se limpia el fondo del papel y se ajusta al recuadro, igual que una firma dibujada.
+  const file = canvas.closest(".pad-wrap")?.querySelector("[data-sigfile]");
+  if (file) file.addEventListener("change", () => {
+    const fl = file.files[0]; file.value = ""; if (!fl) return;
+    const fr = new FileReader();
+    fr.onload = () => { const img = new Image(); img.onload = () => {
+      fit();
+      const r = canvas.getBoundingClientRect(), pad = 8;
+      const sc = Math.min((r.width - 2 * pad) / img.width, (r.height - 2 * pad) / img.height);
+      const w = img.width * sc, h = img.height * sc;
+      ctx.drawImage(img, (r.width - w) / 2, (r.height - h) / 2, w, h);
+      const d = ctx.getImageData(0, 0, canvas.width, canvas.height), px = d.data;
+      for (let i = 0; i < px.length; i += 4) { const l = 0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2]; if (l > 175) px[i] = px[i + 1] = px[i + 2] = 255; }
+      ctx.putImageData(d, 0, 0);
+      dirty = true; canvas.classList.add("inked"); toast("Firma escaneada cargada. Revísela antes de firmar.");
+    }; img.onerror = () => toast("No se pudo leer la imagen de la firma."); img.src = fr.result; };
+    fr.readAsDataURL(fl);
+  });
   return { isEmpty: () => !dirty, clear: () => { dirty = false; canvas.classList.remove("inked"); fit(); }, data: () => canvas.toDataURL("image/png") };
 }
-const padHTML = (who) => `<div class="pad-wrap"><span class="label">Firma de ${esc(who)}</span><canvas class="pad" id="pad"></canvas><div class="row"><button type="button" class="btn small ghost" id="padClear">Borrar firma</button><span class="small muted">Firme con el dedo o el mouse.</span></div></div>`;
+const padHTML = (who) => `<div class="pad-wrap"><span class="label">Firma de ${esc(who)}</span><canvas class="pad" id="pad"></canvas><div class="row"><button type="button" class="btn small ghost" id="padClear">Borrar firma</button><label class="btn small" for="padFile">${IC.camera}Subir firma escaneada</label><input type="file" id="padFile" data-sigfile accept="image/*" hidden><span class="small muted">Firme con el dedo o el mouse, o suba una foto o escaneo de su firma en papel blanco.</span></div></div>`;
 
 function signerName(p) { return p[ROLES[state.role].campo] || ROLES[state.role].nombre; }
 
