@@ -100,6 +100,11 @@ header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; b
 .icon-btn { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--line); background: var(--paper-2); color: var(--ink); display: grid; place-items: center; cursor: pointer; flex: none; }
 .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
 
+.user-badge { display: flex; align-items: center; gap: 10px; padding: 6px 12px 6px 6px; background: var(--paper-2); border: 1px solid var(--line); border-radius: 999px; width: fit-content; max-width: 100%; font-size: 0.85rem; min-width: 0; }
+.user-badge .av svg.i { width: 15px; height: 15px; stroke: #fff; }
+.user-badge .av { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-size: 0.72rem; font-weight: 700; color: #fff; background: var(--rc); flex: none; }
+.user-badge b { white-space: nowrap; }
+.user-badge span.n { color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .roles { max-width: 480px; width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 4px; background: var(--paper-2); border: 1px solid var(--line); border-radius: 999px; position: relative; }
 .roles button { border: 0; background: none; color: var(--muted); font: 600 0.85rem var(--font-body); padding: 6px 8px; border-radius: 999px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; min-width: 0; transition: background 0.2s, color 0.2s, box-shadow 0.2s; }
 .roles button span:last-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -459,11 +464,7 @@ button.citem:active { transform: scale(0.99); }
         <button class="icon-btn" id="themeBtn" type="button" aria-label="Cambiar tema claro u oscuro"></button>
       </div>
     </div>
-    <div class="roles" id="roleSeg" role="radiogroup" aria-label="Actuando como">
-      <button type="button" role="radio" data-role="contratista"><span class="av">C</span><span>Contratista</span></button>
-      <button type="button" role="radio" data-role="interventor"><span class="av">I</span><span>Interventoría</span></button>
-      <button type="button" role="radio" data-role="entidad"><span class="av">E</span><span>Entidad</span></button>
-    </div>
+    <div class="user-badge" id="userBadge" data-role="interventor"></div>
     <nav class="tabs" role="tablist" id="tabs"></nav>
   </div>
 </header>
@@ -588,15 +589,15 @@ const ROLES = {
   entidad: { nombre: "Entidad contratante", campo: "supervisor" }
 };
 const TIPOS = {
-  diario: { nombre: "Registro diario", roles: ["contratista"] },
-  solicitud: { nombre: "Solicitud a interventoría", roles: ["contratista"] },
+  diario: { nombre: "Informe diario de interventoría", roles: ["interventor"] },
+  solicitud: { nombre: "Solicitud del contratista", roles: ["interventor"] },
   orden: { nombre: "Orden de interventoría", roles: ["interventor"] },
   visita: { nombre: "Visita de interventoría", roles: ["interventor"] },
-  observacion: { nombre: "Observación", roles: ["contratista", "interventor", "entidad"] },
-  aclaracion: { nombre: "Aclaración de asiento", roles: ["contratista", "interventor", "entidad"] },
+  observacion: { nombre: "Observación", roles: ["interventor"] },
+  aclaracion: { nombre: "Aclaración de asiento", roles: ["interventor"] },
   respuesta: { nombre: "Respuesta a solicitud", roles: [] },
   noConformidad: { nombre: "No conformidad", roles: ["interventor"] },
-  correccion: { nombre: "Corrección de no conformidad", roles: [] },
+  correccion: { nombre: "Corrección del contratista", roles: [] },
   cierreNC: { nombre: "Verificación de corrección", roles: [] }
 };
 const CATEGORIAS = ["Aprobación de material", "Consulta técnica", "Mayor cantidad de obra", "Obra no prevista", "Prórroga o suspensión", "Aprobación de personal", "Otra"];
@@ -776,7 +777,7 @@ function buildSample() {
   let inicio = today.getTime(); let k = 0;
   while (k < 25) { inicio -= DAY; if (isWeekday(new Date(inicio))) k++; }
   const p = blankProject({
-    ejemplo: true, contrato: "OBRA-014-2026", objeto: "Construcción de cuatro aulas y batería sanitaria en la Institución Educativa Rural El Carmen",
+    ejemplo: true, version: 3, contrato: "OBRA-014-2026", objeto: "Construcción de cuatro aulas y batería sanitaria en la Institución Educativa Rural El Carmen",
     entidad: "Municipio de ejemplo (Secretaría de Infraestructura)", contratista: "Consorcio Aulas 2026", interventoria: "Interventoría Técnica del Valle S.A.S.",
     residente: "Ing. Laura Méndez", interventor: "Ing. Andrés Rojas", supervisor: "Arq. Camila Torres", valor: 1450000000, plazoDias: 150, plazoRespuesta: 3, municipio: "[Municipio]"
   });
@@ -807,7 +808,7 @@ function buildSample() {
   }
   const items = [];
   plan.forEach(x => items.push({
-    tipo: "diario", autorRol: "contratista", autorNombre: p.residente, fechaHechos: x.hechos, registradoAt: x.reg,
+    tipo: "diario", autorRol: "interventor", autorNombre: p.interventor, fechaHechos: x.hechos, registradoAt: x.reg,
     clima: CLIMA[x.i % 3 === 2 ? 2 : x.i % 2], personal: 8 + (x.i % 5), equipos: x.i % 4 === 0 ? "" : "Mezcladora 1 bulto, vibrador, andamios",
     actividades: x.act, texto: "", evidencias: x.i % 3 === 1 ? [] : [{ img: sampleImage("Frente aulas · día " + (x.i + 1), 200 + x.i * 7), at: x.hechos, lat: 3.4516, lon: -76.532, nombre: "foto.jpg" }]
   }));
@@ -823,7 +824,7 @@ function buildSample() {
   solDefs.forEach(s => {
     let base = inicio; let c = 0; while (c < s.d) { base += DAY; if (isWeekday(new Date(base))) c++; }
     const at = base + 10 * 3600000;
-    items.push({ tipo: "solicitud", autorRol: "contratista", autorNombre: p.residente, fechaHechos: at, registradoAt: at, texto: s.txt, solicitud: { categoria: s.cat, plazo: p.plazoRespuesta }, _resp: s });
+    items.push({ tipo: "solicitud", autorRol: "interventor", autorNombre: p.interventor, presentadaPor: p.residente, fechaHechos: at, registradoAt: at, texto: s.txt, solicitud: { categoria: s.cat, plazo: p.plazoRespuesta }, _resp: s });
   });
   const ncAt = (d, h) => { let base = inicio; let c = 0; while (c < d) { base += DAY; if (isWeekday(new Date(base))) c++; } return base + h * 3600000; };
   [
@@ -855,8 +856,8 @@ function buildSample() {
       } else {
         const r = pendingNC.shift();
         const corr = r.tipo === "correccion";
-        const e = { tipo: r.tipo, autorRol: corr ? "contratista" : "interventor", autorNombre: corr ? p.residente : p.interventor, fechaHechos: r.at, registradoAt: r.at, texto: r.texto, refFolio: r.nc.folio };
-        if (!corr) e.eficaz = true;
+        const e = { tipo: r.tipo, autorRol: "interventor", autorNombre: p.interventor, fechaHechos: r.at, registradoAt: r.at, texto: r.texto, refFolio: r.nc.folio };
+        if (!corr) e.eficaz = true; else e.presentadaPor = p.residente;
         commit(e);
         if (corr) r.nc.nc.correccionFolio = e.folio; else r.nc.nc.cierreFolio = e.folio;
       }
@@ -885,7 +886,7 @@ function buildSample() {
 }
 function freshState() {
   const p = buildSample();
-  return { projects: [p], current: p.id, role: "contratista", tab: "resumen" };
+  return { projects: [p], current: p.id, role: "interventor", tab: "resumen" };
 }
 
 /* ---------- interfaz general ---------- */
@@ -920,7 +921,7 @@ const IC = {
   resp: SVG('<path d="M10 8 5 12.5l5 4.5"/><path d="M5 12.5h9a5 5 0 0 1 5 5V19"/>')
 };
 const TIPO_IC = { diario: IC.bitacora, solicitud: IC.sol, orden: IC.orden, visita: IC.visita, observacion: IC.obs, aclaracion: IC.pen, respuesta: IC.resp, noConformidad: IC.alert, correccion: IC.pen, cierreNC: IC.shield };
-const TIPO_DESC = { diario: "Clima, personal, equipos, actividades y fotos del día.", solicitud: "Pida a la interventoría una aprobación o concepto con plazo.", orden: "Instrucción formal al contratista.", visita: "Lo que la interventoría verificó en campo.", observacion: "Cualquier anotación relevante para el contrato.", noConformidad: "Requisito incumplido, severidad y plazo de corrección." };
+const TIPO_DESC = { diario: "Clima, personal y equipos del contratista, actividades y fotos del día.", solicitud: "Radique lo que le pide el contratista; el plazo de respuesta empieza a contar.", orden: "Instrucción formal al contratista.", visita: "Lo que verificó en campo.", observacion: "Cualquier anotación relevante para el contrato.", noConformidad: "Requisito incumplido, severidad y plazo de corrección." };
 const TABS = [["resumen", "Resumen", "Inicio"], ["acta", "Acta de inicio", "Acta"], ["bitacora", "Bitácora", "Bitácora"], ["solicitudes", "Solicitudes", "Solicit."], ["nc", "No conformidades", "NC"], ["reporte", "Reporte", "Reporte"], ["proyecto", "Proyecto", "Proyecto"]];
 $("#tabs").innerHTML = TABS.map(([k, l, s]) => `<button role="tab" data-tab="${k}"><span class="ti">${IC[k]}</span><span class="lbl">${l}</span><span class="lbl-s">${s}</span><span class="count" hidden></span></button>`).join("");
 
@@ -973,7 +974,7 @@ function countUp(root) {
 function render() {
   const p = P();
   hideTip();
-  document.querySelectorAll("#roleSeg [data-role]").forEach(b => b.setAttribute("aria-checked", b.dataset.role === state.role ? "true" : "false"));
+  $("#userBadge").innerHTML = `<span class="av">${IC.shield}</span><b>Interventoría</b><span class="n">${esc(p.interventor || "Interventor sin nombre")}</span>`;
   $("#projSel").innerHTML = state.projects.map(x => `<option value="${x.id}" ${x.id === state.current ? "selected" : ""}>${esc(x.contrato || "Proyecto sin número")}${x.ejemplo ? " (ejemplo)" : ""}</option>`).join("") + `<option value="__new">+ Nuevo proyecto</option>`;
   $("#projName").textContent = p.objeto || "Proyecto nuevo";
   const ind = indicadores(p);
@@ -1080,7 +1081,7 @@ function viewResumen(p, ind) {
       <div class="hero-stats"><span><b>${faltan}</b>días para terminar</span><span><b>${p.asientos.length}</b>folios</span><span><b>${fmtCorto(p.acta.fechaInicio)}</b>inicio</span><span><b>${fmtCorto(fin)}</b>terminación</span></div>
       <div class="hero-chips">
         <button class="hchip" data-go="bitacora">${IC.shield}${chain.ok ? "Bitácora íntegra" : "Bitácora alterada"}</button>
-        <button class="hchip" ${hoyDiario ? `data-go="bitacora"` : state.role === "contratista" ? `data-new="diario"` : `data-go="bitacora"`}>${hoyDiario ? IC.check + "Registro de hoy hecho" : IC.clock + "Falta el registro de hoy"}</button>
+        <button class="hchip" ${hoyDiario ? `data-go="bitacora"` : `data-new="diario"`}>${hoyDiario ? IC.check + "Informe de hoy hecho" : IC.clock + "Falta el informe de hoy"}</button>
       </div>
     </div>
   </section>
@@ -1131,10 +1132,10 @@ function viewActa(p) {
   const sigCard = rol => {
     const f = a.firmas[rol];
     const nombre = p[ROLES[rol].campo] || "(sin nombre)";
-    const canSign = !a.suscrita && allChecks && state.role === rol && !f;
+    const canSign = !a.suscrita && allChecks && !f;
     return `<div class="sig" data-role="${rol}"><span class="label">${ROLES[rol].nombre}${rol === "entidad" ? " (opcional)" : ""}</span>
       ${f ? `<img src="${f.img}" alt="Firma de ${esc(f.nombre)}"><span><b>${esc(f.nombre)}</b></span><span class="small muted">Firmó ${fmtDateTime(f.at)}</span>`
-          : `<span>${esc(nombre)}</span><span class="small muted">${allChecks ? (state.role === rol ? "Puede firmar ahora." : `Cambie el rol a «${ROLES[rol].nombre}» para firmar.`) : "Pendiente: complete los requisitos."}</span>
+          : `<span>${esc(nombre)}</span><span class="small muted">${allChecks ? (rol === "interventor" ? "Puede firmar ahora." : "Firma en este dispositivo, en la reunión de inicio.") : "Pendiente: complete los requisitos."}</span>
              <div><button class="btn primary small" data-sign-acta="${rol}" ${canSign ? "" : "disabled"}>${IC.pen}Firmar acta</button></div>`}
     </div>`;
   };
@@ -1152,9 +1153,9 @@ function viewActa(p) {
   <section class="panel">
     <div class="panel-head"><h3>Requisitos previos</h3><span class="small muted">${nOk} de ${REQUISITOS.length} verificados</span></div>
     <div class="progress ${allChecks ? "full" : ""}"><span style="width:${nOk / REQUISITOS.length * 100}%"></span></div>
-    <p class="small muted">El acta solo se puede firmar cuando la interventoría verifica todos los requisitos de ejecución.${state.role !== "interventor" && !a.suscrita ? " Cambie el rol a Interventoría para marcarlos." : ""}</p>
+    <p class="small muted">El acta solo se puede firmar cuando la interventoría verifica todos los requisitos de ejecución.</p>
     <div class="checklist">
-      ${REQUISITOS.map(([k, t, n]) => `<label class="check ${a.checks[k] ? "done" : ""}" for="chk-${k}"><input type="checkbox" id="chk-${k}" data-check="${k}" ${a.checks[k] ? "checked" : ""} ${a.suscrita || state.role !== "interventor" ? "disabled" : ""}><span>${esc(t)}<br><span class="small muted">${esc(n)}</span></span></label>`).join("")}
+      ${REQUISITOS.map(([k, t, n]) => `<label class="check ${a.checks[k] ? "done" : ""}" for="chk-${k}"><input type="checkbox" id="chk-${k}" data-check="${k}" ${a.checks[k] ? "checked" : ""} ${a.suscrita ? "disabled" : ""}><span>${esc(t)}<br><span class="small muted">${esc(n)}</span></span></label>`).join("")}
     </div>
   </section>
   <section class="panel">
@@ -1172,7 +1173,8 @@ function entryCard(p, e, opts = {}) {
   if (e.tipo === "respuesta") extra = `<span class="pill ok">${esc(e.decision || "Respuesta")}</span><a href="#folio-${e.refFolio}" data-jump="${e.refFolio}">Responde al folio ${e.refFolio}</a>`;
   if (e.tipo === "aclaracion") extra = `<a href="#folio-${e.refFolio}" data-jump="${e.refFolio}">Aclara el folio ${e.refFolio}</a>`;
   if (e.tipo === "noConformidad") { const s = ncEstado(p, e); extra = `<span class="pill ${s.clase}">${s.texto}</span><span>${SEVERIDAD[e.nc.severidad]} · corregir antes de ${fmtDate(e.nc.venceAt)}</span>`; }
-  if (e.tipo === "correccion") extra = `<a href="#folio-${e.refFolio}" data-jump="${e.refFolio}">Corrige la no conformidad del folio ${e.refFolio}</a>`;
+  if (e.presentadaPor) extra += `<span>Presentada por ${esc(e.presentadaPor)} (contratista)</span>`;
+  if (e.tipo === "correccion") extra = `<span>Presentada por ${esc(e.presentadaPor || p.residente)} (contratista)</span><a href="#folio-${e.refFolio}" data-jump="${e.refFolio}">Corrige la no conformidad del folio ${e.refFolio}</a>`;
   if (e.tipo === "cierreNC") extra = `<span class="pill ${e.eficaz ? "ok" : "bad"}">${e.eficaz ? "Corrección eficaz" : "Corrección no eficaz"}</span><a href="#folio-${e.refFolio}" data-jump="${e.refFolio}">No conformidad del folio ${e.refFolio}</a>`;
   const tardio = isoDay(e.fechaHechos) !== isoDay(e.registradoAt);
   return `<article class="entry t-${e.tipo}" id="folio-${e.folio}" data-role="${e.autorRol}">
@@ -1197,8 +1199,8 @@ function entryCard(p, e, opts = {}) {
 }
 function ncActions(e) {
   if (e.tipo !== "noConformidad" || e.nc.cierreFolio) return "";
-  if (!e.nc.correccionFolio && state.role === "contratista") return `<button class="btn primary small" data-correct="${e.folio}">Registrar corrección</button>`;
-  if (e.nc.correccionFolio && state.role === "interventor") return `<button class="btn primary small" data-verify="${e.folio}">Verificar corrección</button>`;
+  if (!e.nc.correccionFolio) return `<button class="btn primary small" data-correct="${e.folio}">Radicar corrección</button>`;
+  if (e.nc.correccionFolio) return `<button class="btn primary small" data-verify="${e.folio}">Verificar corrección</button>`;
   return "";
 }
 const allowedTypes = () => Object.entries(TIPOS).filter(([k, t]) => t.roles.includes(state.role) && k !== "aclaracion");
@@ -1229,17 +1231,16 @@ function viewSolicitudes(p, ind) {
   const cnt = k => rows.filter(x => !x.s.cerrada && x.s.clase === k).length;
   return `
   <section class="panel">
-    <div class="panel-head"><div><h2>Solicitudes a la interventoría</h2><span class="small muted">${ind.abiertas} abiertas · ${ind.cerradas} respondidas</span></div>${state.role === "contratista" ? `<button class="btn primary" data-new="solicitud">${IC.plus}Nueva solicitud</button>` : ""}</div>
+    <div class="panel-head"><div><h2>Solicitudes del contratista</h2><span class="small muted">${ind.abiertas} abiertas · ${ind.cerradas} respondidas</span></div><button class="btn primary" data-new="solicitud">${IC.plus}Radicar solicitud</button></div>
     <div class="kpis k3">
       ${kpi("Vencidas", cnt("bad"), cnt("bad") ? "bad" : "good", "requieren respuesta ya", IC.alert, "solicitudes", [cnt("bad"), 0])}
       ${kpi("Por vencer", cnt("warn"), cnt("warn") ? "warn" : "good", "menos de 1 día hábil", IC.clock, "solicitudes", [cnt("warn"), 0])}
       ${kpi("A tiempo (IR2)", ind.pctATiempo == null ? "—" : Math.round(ind.pctATiempo * 100) + "<small> %</small>", ind.pctATiempo == null ? "" : ind.pctATiempo >= 0.9 ? "good" : "bad", "meta ≥ 90 %", IC.check, "resumen", ind.pctATiempo == null ? null : [Math.round(ind.pctATiempo * 100), 0])}
     </div>
-    <p class="small muted">Cada solicitud vence ${p.plazoRespuesta} días hábiles después de registrada (plazo pactado en el acta de inicio; no cuentan sábados, domingos ni festivos). La respuesta queda como un folio vinculado y el tiempo se mide automáticamente.</p>
+    <p class="small muted">Cada solicitud vence ${p.plazoRespuesta} días hábiles después de radicada (plazo pactado en el acta de inicio; no cuentan sábados, domingos ni festivos). La respuesta queda como un folio vinculado y el tiempo se mide automáticamente.</p>
     ${rows.length ? `<div class="table-wrap"><table class="stack"><thead><tr><th>Folio</th><th>Solicitud</th><th>Registrada</th><th>Vence</th><th>Días háb.</th><th>Estado</th><th></th></tr></thead><tbody>
       ${rows.map(({ e, s }) => `<tr><td class="mono" data-l="Folio">${e.folio}</td><td class="main"><b>${esc(e.solicitud.categoria)}</b><div class="small muted">${esc(e.texto)}</div>${e.solicitud.respuestaFolio ? `<div class="small">Respuesta en folio ${e.solicitud.respuestaFolio}</div>` : ""}</td><td data-l="Registrada">${fmtDate(e.registradoAt)}</td><td data-l="Vence">${fmtDate(e.solicitud.venceAt)}</td><td class="num" data-l="Días háb.">${s.dias.toFixed(1).replace(".", ",")}</td><td data-l="Estado"><span class="pill ${s.clase}">${s.texto}</span></td><td>${!s.cerrada && state.role === "interventor" ? `<button class="btn primary small" data-respond="${e.folio}">${IC.resp}Responder</button>` : ""}</td></tr>`).join("")}
-    </tbody></table></div>` : `<div class="empty">${IC.sol}No hay solicitudes registradas. El contratista las crea desde aquí o desde la bitácora.</div>`}
-    ${state.role !== "interventor" && ind.abiertas ? `<p class="small muted">Para responder, cambie el rol a Interventoría.</p>` : ""}
+    </tbody></table></div>` : `<div class="empty">${IC.sol}No hay solicitudes radicadas. Cuando el contratista le presente una, radíquela aquí para que empiece a correr el plazo.</div>`}
   </section>`;
 }
 
@@ -1257,7 +1258,7 @@ function viewNC(p, ind) {
       ${kpi("Mayores abiertas", ind.ncMayores, ind.ncMayores ? "warn" : "good", `plazo ${p.plazosNC.mayor} días háb.`, IC.alert, "nc", [ind.ncMayores, 0])}
       ${kpi("Cierre oportuno", ind.pctNC == null ? "—" : Math.round(ind.pctNC * 100) + "<small> %</small>", ind.pctNC == null ? "" : ind.pctNC >= 0.8 ? "good" : "bad", "meta ≥ 80 %", IC.check, "resumen", ind.pctNC == null ? null : [Math.round(ind.pctNC * 100), 0])}
     </div>
-    <p class="small muted">La interventoría registra el requisito incumplido y la severidad; el plazo de corrección se fija por severidad (crítica ${p.plazosNC.critica}, mayor ${p.plazosNC.mayor}, menor ${p.plazosNC.menor} días hábiles). El contratista registra la corrección y la acción correctiva, y la interventoría cierra la no conformidad solo después de verificar en campo que la corrección es eficaz.</p>
+    <p class="small muted">La interventoría registra el requisito incumplido y la severidad; el plazo de corrección se fija por severidad (crítica ${p.plazosNC.critica}, mayor ${p.plazosNC.mayor}, menor ${p.plazosNC.menor} días hábiles). Cuando el contratista presenta la corrección y la acción correctiva, la interventoría la radica y cierra la no conformidad solo después de verificar en campo que la corrección es eficaz.</p>
     ${rows.length ? `<div class="table-wrap"><table class="stack"><thead><tr><th>Folio</th><th>No conformidad</th><th>Severidad</th><th>Vence</th><th>Estado</th><th></th></tr></thead><tbody>
       ${rows.map(({ e, s }) => `<tr><td class="mono" data-l="Folio">${e.folio}</td><td class="main"><b>${esc(e.nc.requisito)}</b><div class="small muted">${esc(e.texto)}</div>${e.nc.correccionFolio ? `<div class="small">Corrección en folio ${e.nc.correccionFolio}${e.nc.cierreFolio ? ` · cierre en folio ${e.nc.cierreFolio}` : ""}</div>` : ""}</td><td data-l="Severidad"><span class="pill ${e.nc.severidad === "critica" ? "bad" : e.nc.severidad === "mayor" ? "warn" : "idle"}">${SEVERIDAD[e.nc.severidad]}</span></td><td data-l="Vence">${fmtDate(e.nc.venceAt)}</td><td data-l="Estado"><span class="pill ${s.clase}">${s.texto}</span></td><td>${ncActions(e)}</td></tr>`).join("")}
     </tbody></table></div>` : `<div class="empty">${IC.check}No hay no conformidades registradas.</div>`}
@@ -1444,6 +1445,7 @@ async function entryBlock(c, e) {
   c.doc.setFillColor(227, 236, 247); c.doc.rect(c.M, c.y - 4.5, c.W - 2 * c.M, 7, "F");
   h2(c, entryTitle(p, e));
   const pairs = [["Fecha de los hechos", fmtDate(e.fechaHechos)], ["Registrado", fmtDateTime(e.registradoAt)], ["Autor", `${e.autorNombre} (${ROLES[e.autorRol].nombre})`]];
+  if (e.presentadaPor) pairs.push(["Presentada por", `${e.presentadaPor} (contratista)`]);
   if (e.tipo === "diario") pairs.push(["Clima", e.clima || "—"], ["Personal en obra", e.personal || "—"], ["Equipos", e.equipos || "—"]);
   if (e.solicitud) { const s = solicitudEstado(p, e); pairs.push(["Categoría", e.solicitud.categoria], ["Vence", fmtDate(e.solicitud.venceAt)], ["Estado", s.texto]); }
   if (e.nc) { const s = ncEstado(p, e); pairs.push(["Requisito incumplido", e.nc.requisito], ["Severidad", SEVERIDAD[e.nc.severidad]], ["Corregir antes de", fmtDate(e.nc.venceAt)], ["Estado", s.texto]); }
@@ -1583,13 +1585,14 @@ function dlgEntry(p, tipo, refFolio = null) {
         <label class="field" for="ef-equipos">Equipos<input id="ef-equipos" placeholder="Ej.: mezcladora, vibrador"></label>
         <label class="field" for="ef-act" style="grid-column:1/-1">Actividades ejecutadas y cantidades<textarea id="ef-act" required></textarea></label>
         <label class="field" for="ef-txt" style="grid-column:1/-1">Observaciones (opcional)<textarea id="ef-txt"></textarea></label>` : ""}
+      ${tipo === "solicitud" || tipo === "correccion" ? `<label class="field" for="ef-pres">Presentada por (contratista)<input id="ef-pres" value="${esc(p.residente)}" required></label>` : ""}
       ${tipo === "solicitud" ? `<label class="field" for="ef-cat">Categoría<select id="ef-cat">${CATEGORIAS.map(c => `<option>${c}</option>`).join("")}</select></label>
         <div class="field small muted" style="align-self:end">Vence en ${p.plazoRespuesta} días hábiles: ${fmtDate(addBusinessDays(Date.now(), p.plazoRespuesta))}</div>` : ""}
       ${tipo === "noConformidad" ? `<label class="field" for="ef-req" style="grid-column:1/-1">Requisito incumplido (norma, especificación, plano o cláusula)<input id="ef-req" required placeholder="Ej.: NSR-10 C.5.11 curado del concreto"></label>
         <label class="field" for="ef-sev">Severidad<select id="ef-sev">${Object.entries(SEVERIDAD).map(([k, n]) => `<option value="${k}" ${k === "mayor" ? "selected" : ""}>${n} (${p.plazosNC[k]} días háb.)</option>`).join("")}</select></label>
         <div class="field small muted" style="align-self:end" id="ef-sev-vence"></div>` : ""}
       ${tipo === "correccion" && ref ? `<div class="small" style="grid-column:1/-1"><span class="muted">No conformidad:</span> ${esc(ref.nc.requisito)} · ${esc(ref.texto)}</div>` : ""}
-      ${tipo !== "diario" ? `<label class="field" for="ef-txt" style="grid-column:1/-1">${tipo === "solicitud" ? "Descripción de la solicitud" : tipo === "orden" ? "Orden impartida" : tipo === "aclaracion" ? "Aclaración" : tipo === "noConformidad" ? "Hallazgo" : tipo === "correccion" ? "Corrección realizada y acción correctiva para que no se repita" : "Descripción"}<textarea id="ef-txt" required></textarea></label>` : ""}
+      ${tipo !== "diario" ? `<label class="field" for="ef-txt" style="grid-column:1/-1">${tipo === "solicitud" ? "Lo que solicita el contratista" : tipo === "orden" ? "Orden impartida" : tipo === "aclaracion" ? "Aclaración" : tipo === "noConformidad" ? "Hallazgo" : tipo === "correccion" ? "Corrección que presenta el contratista y acción correctiva para que no se repita" : "Descripción"}<textarea id="ef-txt" required></textarea></label>` : ""}
       <div class="field" style="grid-column:1/-1"><span>Evidencias fotográficas</span>
         <div class="row"><label class="btn primary" for="ef-cam">${IC.camera}Tomar foto</label><input type="file" id="ef-cam" accept="image/*" capture="environment" hidden>
         <label class="btn" for="ef-files">${IC.clip}Adjuntar fotos</label><input type="file" id="ef-files" accept="image/*" multiple hidden>
@@ -1629,6 +1632,7 @@ function dlgEntry(p, tipo, refFolio = null) {
       if (tipo === "solicitud") e.solicitud = { categoria: $("#ef-cat", root).value, plazo: p.plazoRespuesta, venceAt: addBusinessDays(now, p.plazoRespuesta) };
       if (tipo === "noConformidad") { const sv = $("#ef-sev", root).value; e.nc = { requisito: $("#ef-req", root).value.trim(), severidad: sv, plazo: p.plazosNC[sv], venceAt: addBusinessDays(now, p.plazosNC[sv]) }; }
       if (ref) e.refFolio = ref.folio;
+      if ($("#ef-pres", root)) e.presentadaPor = $("#ef-pres", root).value.trim();
       e.folio = p.asientos.length + 1;
       e.firma = { nombre: who, img: pad.data(), at: now };
       sealEntry(p, e); p.asientos.push(e);
@@ -1805,7 +1809,6 @@ function bindView(p) {
   });
 }
 $("#tabs").addEventListener("click", e => { const b = e.target.closest("button[data-tab]"); if (b) setTab(b.dataset.tab); });
-$("#roleSeg").addEventListener("click", e => { const b = e.target.closest("[data-role]"); if (!b || b.dataset.role === state.role) return; state.role = b.dataset.role; save(); render(); toast("Ahora actúa como " + ROLES[state.role].nombre + "."); });
 $("#themeBtn").addEventListener("click", () => { const dark = state.theme ? state.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches; state.theme = dark ? "light" : "dark"; save(); applyTheme(); });
 $("#projSel").addEventListener("change", e => { if (e.target.value === "__new") { e.target.value = state.current; return dlgNewProject(); } state.current = e.target.value; save(); render(); });
 
@@ -1814,11 +1817,12 @@ state = load();
 if (!state || !state.projects || !state.projects.length) { state = freshState(); save(); }
 else {
   // Datos guardados por la versión anterior: el ejemplo se regenera y los proyectos propios reciben los campos nuevos.
-  state.projects = state.projects.map(x => x.ejemplo && !x.plazosNC ? buildSample() : x);
+  state.projects = state.projects.map(x => x.ejemplo && x.version !== 3 ? buildSample() : x);
   state.projects.forEach(x => { x.plazosNC = x.plazosNC || { critica: 1, mayor: 5, menor: 10 }; x.mejoras = x.mejoras || []; });
   if (!state.projects.some(x => x.id === state.current)) state.current = state.projects[0].id;
   save();
 }
+state.role = "interventor"; // la aplicación es de uso exclusivo de la interventoría
 applyTheme();
 render();
 if (!framed && "serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js").catch(() => {});
