@@ -7,6 +7,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="BitaObra v2">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
@@ -169,13 +170,27 @@ main { min-width: 0; display: grid; gap: 18px; align-content: start; }
 .inp { width: 100%; min-width: 0; border: 1px solid var(--line); background: var(--paper-2); border-radius: var(--r-sm); padding: 9px 11px; min-height: 42px; }
 .inp:focus { outline: none; border-color: var(--accent); background: var(--paper); box-shadow: 0 0 0 3px var(--accent-soft); }
 textarea.inp { min-height: 76px; resize: vertical; line-height: 1.45; }
+/* Dictado por voz: micrófono dentro de los campos de texto libre */
+.mic-wrap { position: relative; display: block; min-width: 0; }
+.mic-wrap > .inp { padding-right: 48px; }
+.mic { position: absolute; right: 5px; top: 5px; width: 34px; height: 34px; border-radius: 50%; border: 0; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; cursor: pointer; transition: background 0.15s, color 0.15s, transform 0.1s; }
+.mic-wrap > input + .mic { top: 50%; margin-top: -17px; }
+.mic svg { width: 18px; height: 18px; }
+.mic:active { transform: scale(0.92); }
+.mic:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.mic.rec { background: var(--bad); color: #fff; animation: micPulse 1.2s ease-in-out infinite; }
+@keyframes micPulse { 0%, 100% { box-shadow: 0 0 0 0 var(--bad-soft); } 50% { box-shadow: 0 0 0 8px transparent; } }
+@media (prefers-reduced-motion: reduce) { .mic.rec { animation: none; } }
 .inp[readonly] { background: transparent; border-style: dashed; color: var(--muted); }
 .chk { display: flex; gap: 10px; align-items: flex-start; padding: 9px 11px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--paper-2); }
 .chk > input { width: 20px; height: 20px; margin: 1px 0 0; accent-color: var(--accent); flex: none; }
 .chk .inp { min-height: 34px; padding: 5px 9px; margin-top: 6px; }
 .chk-txt { flex: 1; min-width: 0; }
 .list { display: grid; gap: 8px; }
-.lrow { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)) 36px; align-items: end; padding: 10px; border-radius: var(--r-sm); background: var(--paper-2); border: 1px solid var(--line); }
+.lrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; padding: 10px; border-radius: var(--r-sm); background: var(--paper-2); border: 1px solid var(--line); }
+.lrow > .field { flex: 1 1 120px; min-width: 0; }
+.lrow > .field:has(.mic-wrap) { flex-basis: 220px; }
+.lrow > .del, .lrow > span:last-child { flex: none; }
 .lrow .inp { background: var(--paper); }
 .lrow .field label { font-size: 11.5px; }
 .del { border: 0; background: none; color: var(--muted); width: 36px; height: 42px; border-radius: 8px; display: grid; place-items: center; }
@@ -680,6 +695,8 @@ const I = {
   img: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 17l-5-5-9 8"/></svg>',
   copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg>',
   pdf: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4M12 11v6M9.5 14.5L12 17l2.5-2.5"/></svg>',
+  mic: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/></svg>',
+  micOff: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="7" width="10" height="10" rx="2"/></svg>',
   check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>',
   t: {
     inicio: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg>',
@@ -715,8 +732,12 @@ function inputHtml(c, val, path, ro) {
     ctl = `<select class="inp" id="${id}" data-p="${path}"${dis}><option value="">${ss.length ? "Elegir…" : "No hay actas de suspensión cerradas"}</option>${ss.map(s => `<option value="${s.id}"${s.id === val ? " selected" : ""}>N.º ${pad(s.consecutivo)} · ${fCorta(s.datos.fechaSusp)}</option>`).join("")}</select>`;
   }
   else ctl = `<input class="inp" id="${id}" data-p="${path}" type="${c.ty === "number" ? "number" : c.ty || "text"}"${c.ty === "number" ? ' inputmode="decimal" step="any"' : ""} value="${esc(val)}"${ph}${dis}>`;
+  if (!ro && (c.ty === "textarea" || ((!c.ty || c.ty === "text") && CON_VOZ.includes(c.k)))) ctl = micHtml(ctl, id);
   return `<div class="field${c.wide ? " wide" : ""}"><label for="${id}">${esc(c.l || "")}</label>${ctl}</div>`;
 }
+// Campos de texto libre que llevan micrófono: todas las áreas de texto y estas columnas de las listas.
+const CON_VOZ = ["desc", "loc", "que", "climaAfecta"];
+const micHtml = (ctl, id) => `<span class="mic-wrap">${ctl}<button type="button" class="mic" data-mic="${id}" title="Dictar por voz" aria-label="Dictar por voz" aria-pressed="false">${I.mic}</button></span>`;
 function campoHtml(c, r, ro) {
   const d = r.datos;
   if (c.calc) return `<div class="calc wide" data-calc="${c.calc}">${calcHtml(c.calc, r)}</div>`;
@@ -830,6 +851,7 @@ function vistaProyecto() {
       <div id="respaldo-msg"></div></div>`;
 }
 function render() {
+  stopDictado();
   const m = $("#main");
   document.querySelectorAll(".nav button").forEach(b => b.setAttribute("aria-current", b.dataset.view === ui.view ? "page" : "false"));
   $("#hdr-sub").textContent = S.proyecto.contrato ? `${S.proyecto.contrato} · ${S.proyecto.contratista || ""}` : "Apoyo a la bitácora de obra";
@@ -940,6 +962,81 @@ function ubicacion() {
   return new Promise(res => { try { navigator.geolocation.getCurrentPosition(p => res({ lat: p.coords.latitude, lon: p.coords.longitude }), () => res(null), { timeout: 5000, maximumAge: 60000 }); } catch (e) { res(null); } });
 }
 
+// ---------- Dictado por voz ----------
+// Usa el reconocimiento de voz del navegador (Chrome en Android, Safari en iPhone). Cada sesión es corta
+// (continuous = false) porque en Chrome para Android el modo continuo repite o pierde frases; mientras el botón
+// siga activo se abre otra sesión y lo reconocido se agrega al campo. Necesita conexión a internet.
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+const IS_IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+const IS_STANDALONE = navigator.standalone === true || matchMedia("(display-mode: standalone)").matches;
+let dict = null; // { btn, field, rec, base, lang, huboTexto, vacias }
+function stopDictado(msg) {
+  if (!dict) return;
+  const d = dict; dict = null;
+  try { d.rec && d.rec.abort(); } catch (e) {}
+  micUI(d.btn, false);
+  if (msg) toast(msg);
+}
+function micUI(btn, on) {
+  if (!btn.isConnected) return;
+  btn.classList.toggle("rec", on); btn.innerHTML = on ? I.micOff : I.mic;
+  btn.setAttribute("aria-label", on ? "Detener dictado" : "Dictar por voz"); btn.setAttribute("aria-pressed", on ? "true" : "false");
+}
+function escribirVoz(field, txt) {
+  field.value = txt;
+  if (field.tagName === "TEXTAREA") field.scrollTop = field.scrollHeight;
+  field.dispatchEvent(new Event("input", { bubbles: true }));
+}
+function unirVoz(base, t) { t = t.trim(); if (!t) return base; if (!base.trim() || /[.!?]\s*$/.test(base)) t = t[0].toUpperCase() + t.slice(1); return base.trim() ? base.replace(/\s*$/, " ") + t : t; }
+function sesionDictado(d) {
+  const rec = new SR();
+  rec.lang = d.lang; rec.continuous = false; rec.interimResults = true; rec.maxAlternatives = 1;
+  d.rec = rec;
+  let frase = "";
+  rec.onresult = ev => {
+    if (dict !== d) return;
+    if (!d.field.isConnected) return stopDictado();
+    let t = "";
+    for (let i = 0; i < ev.results.length; i++) { const r = ev.results[i][0].transcript; t = r.startsWith(t) ? r : (t + " " + r); }
+    frase = t.trim();
+    escribirVoz(d.field, unirVoz(d.base, frase));
+  };
+  rec.onerror = ev => {
+    if (dict !== d) return;
+    const e = ev.error;
+    if (e === "no-speech" || e === "aborted") return; // se reintenta en onend
+    if (e === "language-not-supported" && d.lang !== "es-ES") { d.lang = "es-ES"; return; }
+    const msgs = {
+      "not-allowed": "El navegador no dio permiso para usar el micrófono. Permítalo en la configuración del sitio e intente de nuevo.",
+      "service-not-allowed": IS_IOS ? "En iPhone el dictado no funciona dentro de la app instalada. Ábrala en Safari o use el micrófono del teclado." : "Este navegador no permite el dictado. Use Chrome o el micrófono del teclado.",
+      "audio-capture": "No se encontró un micrófono disponible. Cierre otras apps que lo estén usando e intente de nuevo.",
+      "network": "El dictado necesita internet. Sin señal, use el micrófono del teclado del celular."
+    };
+    stopDictado(msgs[e] || "No se pudo dictar (" + e + "). Use el micrófono del teclado del celular.");
+  };
+  rec.onend = () => {
+    if (dict !== d) return;
+    if (frase) { d.base = unirVoz(d.base, frase); escribirVoz(d.field, d.base); d.huboTexto = true; d.vacias = 0; }
+    else d.vacias++;
+    if (d.vacias >= 3 || !d.field.isConnected) return stopDictado(d.huboTexto ? "Dictado terminado." : "No se escuchó nada. Hable cerca del micrófono y vuelva a tocar el botón.");
+    try { sesionDictado(d); } catch (e) { stopDictado("Dictado terminado."); }
+  };
+  rec.start();
+}
+function startDictado(btn, field) {
+  if (!field) return;
+  if (dict) { const mismo = dict.field === field; stopDictado(mismo ? "Dictado terminado." : ""); if (mismo) return; }
+  if (!SR) return toast("Este navegador no permite dictar. Use Chrome o Safari, o el micrófono del teclado del celular.");
+  if (IS_IOS && IS_STANDALONE) return toast("En iPhone el dictado no funciona dentro de la app instalada. Ábrala en Safari o use el micrófono del teclado.");
+  if (!window.isSecureContext) return toast("El dictado solo funciona si la app se abre con https.");
+  if (navigator.onLine === false) return toast("El dictado necesita internet. Sin señal, use el micrófono del teclado del celular.");
+  const d = { btn, field, base: field.value || "", lang: "es-CO", huboTexto: false, vacias: 0 };
+  dict = d; micUI(btn, true);
+  try { sesionDictado(d); toast("Escuchando… hable y el texto se irá escribiendo. Toque de nuevo para terminar."); }
+  catch (e) { stopDictado("No se pudo iniciar el micrófono. Use el micrófono del teclado del celular."); }
+}
+document.addEventListener("mousedown", e => { if (e.target.closest("[data-mic]")) e.preventDefault(); });
+
 // ---------- Eventos ----------
 function regActual() { const ed = document.querySelector("[data-editor]"); return ed ? S.registros.find(r => r.id === ed.dataset.editor) : null; }
 function setPath(obj, path, val) { const ks = path.split("."); let o = obj; for (let i = 0; i < ks.length - 1; i++) { const k = ks[i]; if (o[k] === undefined || typeof o[k] !== "object") o[k] = {}; o = o[k]; } o[ks[ks.length - 1]] = val; }
@@ -972,6 +1069,7 @@ document.addEventListener("click", async e => {
   const d = b.dataset;
   if (d.cerrarOv !== undefined && e.target === b) return cerrarModal();
   if (b.tagName !== "BUTTON") return;
+  if (d.mic) return startDictado(b, document.getElementById(d.mic));
   if (d.view) { ui.view = d.view; ui.abierto = null; render(); window.scrollTo(0, 0); return; }
   if (d.viewGo) { ui.view = d.viewGo; ui.filtro = "sinfolio"; render(); return; }
   if (d.nueva) { const r = nuevoRegistro(d.nueva); ui.abierto = r.id; ui.view = d.nueva === "diaria" ? "hoy" : "actas"; render(); window.scrollTo(0, 0); return; }
