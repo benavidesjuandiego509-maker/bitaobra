@@ -1,0 +1,1030 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1d4f91">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="BitaObra v2">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>BitaObra</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,400..800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Concepto: el libro foliado de obra. La app es la hoja de borrador que se llena en campo;
+   el texto que va al libro se muestra en papel rayado con letra de imprenta seria.
+   Azul de plano para la marca, amarillo de señalización solo para "lo que falta". */
+:root {
+  --bg: #e9edf0;
+  --paper: #ffffff;
+  --paper-2: #f4f6f8;
+  --ink: #17212b;
+  --muted: #5b6874;
+  --line: #d6dde3;
+  --accent: #1d4f91;
+  --accent-ink: #ffffff;
+  --accent-soft: #e2ebf7;
+  --band-1: #1d4f91;
+  --band-2: #143a6c;
+  --signal: #b77900;
+  --signal-soft: #fdf1d6;
+  --ok: #1f7a4a;
+  --ok-soft: #e0f1e7;
+  --bad: #b3261e;
+  --bad-soft: #f8e3e1;
+  --rule: #c9d6e6;
+  --margin-rule: #e4a3a3;
+  --sheet: #fffefb;
+  --shadow: 0 1px 2px rgba(20, 34, 50, .06), 0 6px 20px rgba(20, 34, 50, .07);
+  --shadow-lg: 0 18px 50px rgba(10, 22, 36, .28);
+  --f-display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --f-body: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  --r: 14px;
+  --r-sm: 9px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f151b; --paper: #18212a; --paper-2: #1e2933; --ink: #e5ebf0; --muted: #9aa9b6; --line: #2b3844;
+    --accent: #8db5ee; --accent-ink: #0d1724; --accent-soft: #1d3150;
+    --band-1: #1b3b66; --band-2: #122641;
+    --signal: #f0be55; --signal-soft: #3a2c10; --ok: #72cf9b; --ok-soft: #153123; --bad: #f2928a; --bad-soft: #3d1d1b;
+    --rule: #2f3e4e; --margin-rule: #6b3b3b; --sheet: #1c252e;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.25);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f151b; --paper: #18212a; --paper-2: #1e2933; --ink: #e5ebf0; --muted: #9aa9b6; --line: #2b3844;
+  --accent: #8db5ee; --accent-ink: #0d1724; --accent-soft: #1d3150;
+  --band-1: #1b3b66; --band-2: #122641;
+  --signal: #f0be55; --signal-soft: #3a2c10; --ok: #72cf9b; --ok-soft: #153123; --bad: #f2928a; --bad-soft: #3d1d1b;
+  --rule: #2f3e4e; --margin-rule: #6b3b3b; --sheet: #1c252e;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.25);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { min-height: 100%; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.5; font-variation-settings: "wdth" 100; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--band-2); }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; line-height: 1.15; }
+.mono { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+
+/* ---------- Encabezado ---------- */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; color: #fff;
+  background: linear-gradient(120deg, var(--band-1), var(--band-2));
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 10px; }
+.top-in { max-width: 1120px; margin: 0 auto; display: flex; align-items: center; gap: 12px; }
+.brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.brand-mark { width: 34px; height: 34px; border-radius: 9px; background: rgba(255,255,255,.14); display: grid; place-items: center; flex: none; }
+.brand-name { font-family: var(--f-display); font-weight: 800; font-size: 19px; letter-spacing: .01em; font-variation-settings: "wdth" 80; }
+.brand-sub { font-size: 12px; opacity: .82; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.brand-txt { min-width: 0; }
+.top-spacer { flex: 1; }
+.chip-demo { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; background: rgba(255,255,255,.16); border-radius: 99px; padding: 3px 9px; white-space: nowrap; }
+.icon-btn { border: 0; background: rgba(255,255,255,.12); color: #fff; width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; flex: none; }
+.icon-btn:hover { background: rgba(255,255,255,.22); }
+
+/* ---------- Estructura ---------- */
+.shell { max-width: 1120px; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 20px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 18px 110px; }
+.nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; background: var(--paper); border-top: 1px solid var(--line);
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  padding-left: max(8px, env(safe-area-inset-left, 0px)); padding-right: max(8px, env(safe-area-inset-right, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); }
+.nav button { border: 0; background: none; padding: 9px 4px 8px; display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 12px; color: var(--muted); font-weight: 600; }
+.nav button svg { width: 22px; height: 22px; }
+.nav button[aria-current="page"] { color: var(--accent); }
+.nav button[aria-current="page"] .nav-ico { background: var(--accent-soft); }
+.nav-ico { padding: 3px 14px; border-radius: 99px; display: grid; place-items: center; }
+@media (min-width: 900px) {
+  .shell { grid-template-columns: 200px 1fr; padding-block: 24px 48px; }
+  .nav { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 80px); align-self: start; display: flex; flex-direction: column; gap: 4px;
+    border: 0; background: none; padding: 0; }
+  .nav button { flex-direction: row; justify-content: flex-start; gap: 10px; padding: 8px 10px; font-size: 14px; border-radius: 10px; }
+  .nav button:hover { background: var(--paper); }
+  .nav-ico { padding: 4px 8px; }
+}
+main { min-width: 0; display: grid; gap: 18px; align-content: start; }
+
+/* ---------- Piezas ---------- */
+.card { background: var(--paper); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--shadow); }
+.pad { padding: 16px 18px; }
+.eyebrow { font-size: 11.5px; letter-spacing: .09em; text-transform: uppercase; font-weight: 700; color: var(--muted); }
+.page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.page-head h1 { font-size: clamp(24px, 4vw, 30px); font-weight: 800; font-variation-settings: "wdth" 85; }
+.btn { border: 1px solid var(--line); background: var(--paper); border-radius: 10px; padding: 9px 14px; font-weight: 600; display: inline-flex; align-items: center; gap: 7px; min-height: 40px; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.primary:hover { filter: brightness(1.08); }
+.btn.ghost { background: transparent; border-color: transparent; color: var(--accent); }
+.btn.small { min-height: 32px; padding: 5px 10px; font-size: 13.5px; }
+.btn.danger { color: var(--bad); }
+.btn svg { width: 17px; height: 17px; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.pill { display: inline-flex; align-items: center; gap: 5px; border-radius: 99px; padding: 2px 9px; font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+.pill.ok { background: var(--ok-soft); color: var(--ok); }
+.pill.warn { background: var(--signal-soft); color: var(--signal); }
+.pill.bad { background: var(--bad-soft); color: var(--bad); }
+.pill.idle { background: var(--paper-2); color: var(--muted); border: 1px solid var(--line); }
+.pill.accent { background: var(--accent-soft); color: var(--accent); }
+
+/* Medidor de completitud */
+.meter { display: grid; gap: 12px; }
+.meter-top { display: flex; gap: 14px; align-items: center; }
+.ring { width: 84px; height: 84px; position: relative; flex: none; }
+.ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.ring .val { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; }
+.ring .num { font-family: var(--f-display); font-weight: 800; font-size: 25px; line-height: 1; font-variation-settings: "wdth" 80; }
+.ring .lbl { font-size: 10.5px; color: var(--muted); letter-spacing: .05em; text-transform: uppercase; }
+.missing { display: flex; flex-wrap: wrap; gap: 6px; }
+.miss { border: 1px dashed var(--signal); background: var(--signal-soft); color: var(--signal); border-radius: 8px; padding: 3px 8px; font-size: 13px; font-weight: 600; }
+.miss .mono { font-size: 11.5px; opacity: .85; margin-right: 4px; }
+
+/* Hoja de registro */
+.today-grid { display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr); grid-template-areas: "meter" "ed" "help"; }
+.g-meter { grid-area: meter; } .g-ed { grid-area: ed; min-width: 0; } .g-help { grid-area: help; display: grid; gap: 14px; align-content: start; }
+.ring .lbl { display: none; }
+@media (min-width: 1100px) { .today-grid { gap: 18px; grid-template-columns: minmax(0, 1fr) 310px; grid-template-rows: auto 1fr; grid-template-areas: "ed meter" "ed help"; } .g-meter { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 80px); align-self: start; } }
+.sec { padding: 14px 18px 16px; border-top: 1px solid var(--line); }
+.sec:first-child { border-top: 0; }
+.sec-h { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+.sec-h h3 { font-size: 16.5px; font-weight: 700; }
+.crit { display: inline-flex; gap: 4px; }
+.crit span { font-family: var(--f-mono); font-size: 11px; padding: 1px 6px; border-radius: 5px; border: 1px solid var(--line); color: var(--muted); }
+.crit span.on { border-color: transparent; background: var(--ok-soft); color: var(--ok); }
+.crit span.off { border-color: var(--signal); color: var(--signal); background: var(--signal-soft); }
+.fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px 12px; }
+.field { display: grid; gap: 4px; min-width: 0; }
+.field.wide { grid-column: 1 / -1; }
+.field label, .lbl-s { font-size: 12.5px; font-weight: 600; color: var(--muted); }
+.inp { width: 100%; min-width: 0; border: 1px solid var(--line); background: var(--paper-2); border-radius: var(--r-sm); padding: 9px 11px; min-height: 42px; }
+.inp:focus { outline: none; border-color: var(--accent); background: var(--paper); box-shadow: 0 0 0 3px var(--accent-soft); }
+textarea.inp { min-height: 76px; resize: vertical; line-height: 1.45; }
+.inp[readonly] { background: transparent; border-style: dashed; color: var(--muted); }
+.chk { display: flex; gap: 10px; align-items: flex-start; padding: 9px 11px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--paper-2); }
+.chk > input { width: 20px; height: 20px; margin: 1px 0 0; accent-color: var(--accent); flex: none; }
+.chk .inp { min-height: 34px; padding: 5px 9px; margin-top: 6px; }
+.chk-txt { flex: 1; min-width: 0; }
+.list { display: grid; gap: 8px; }
+.lrow { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)) 36px; align-items: end; padding: 10px; border-radius: var(--r-sm); background: var(--paper-2); border: 1px solid var(--line); }
+.lrow .inp { background: var(--paper); }
+.lrow .field label { font-size: 11.5px; }
+.del { border: 0; background: none; color: var(--muted); width: 36px; height: 42px; border-radius: 8px; display: grid; place-items: center; }
+.del:hover { color: var(--bad); background: var(--bad-soft); }
+.tot { font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
+.calc { font-size: 13.5px; background: var(--accent-soft); color: var(--accent); border-radius: var(--r-sm); padding: 8px 11px; font-weight: 600; }
+.calc.wide { grid-column: 1 / -1; }
+
+/* Fotos */
+.photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 8px; }
+.ph { position: relative; aspect-ratio: 4 / 3; max-width: 100%; border-radius: 10px; overflow: hidden; background: var(--paper-2); border: 1px solid var(--line); }
+.ph img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ph .cap { position: absolute; left: 0; right: 0; bottom: 0; font-size: 10.5px; padding: 3px 6px; color: #fff; background: linear-gradient(transparent, rgba(0,0,0,.65)); font-family: var(--f-mono); }
+.ph .x { position: absolute; top: 4px; right: 4px; width: 26px; height: 26px; border-radius: 99px; border: 0; background: rgba(0,0,0,.55); color: #fff; display: grid; place-items: center; }
+.add-ph { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.file-lbl { position: relative; overflow: hidden; }
+.file-lbl input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+
+/* Barra de acciones de la hoja */
+.sheet-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; padding: 14px 18px; border-top: 1px solid var(--line); background: var(--paper-2); border-radius: 0 0 var(--r) var(--r); }
+.lock { display: flex; gap: 10px; align-items: center; padding: 12px 18px; background: var(--accent-soft); color: var(--accent); font-weight: 600; font-size: 14px; border-radius: var(--r) var(--r) 0 0; }
+
+/* Actas funcionales */
+.types { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
+.type { text-align: left; border: 1px solid var(--line); background: var(--paper); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 6px; box-shadow: var(--shadow); }
+.type:hover { border-color: var(--accent); }
+.type h3 { font-size: 17px; font-weight: 700; }
+.type p { margin: 0; font-size: 13.5px; color: var(--muted); }
+.type .tag { justify-self: start; }
+.type-ico { width: 34px; height: 34px; border-radius: 9px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; }
+
+/* Bitácora (línea de folios) */
+.ledger { display: grid; }
+.entry { display: grid; grid-template-columns: 62px 1fr auto; gap: 14px; align-items: center; padding: 12px 16px; border-top: 1px solid var(--line); text-align: left; background: none; border-left: 0; border-right: 0; border-bottom: 0; width: 100%; }
+.entry:first-child { border-top: 0; }
+.entry:hover { background: var(--paper-2); }
+.folio-no { font-family: var(--f-mono); font-size: 13px; text-align: center; border: 1px solid var(--line); border-radius: 8px; padding: 5px 0; background: var(--paper-2); line-height: 1.2; }
+.folio-no b { display: block; font-size: 17px; font-weight: 500; color: var(--ink); }
+.folio-no small { font-size: 9.5px; color: var(--muted); letter-spacing: .05em; text-transform: uppercase; }
+.entry-main { min-width: 0; }
+.entry-t { font-weight: 700; }
+.entry-s { font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.entry-r { display: grid; justify-items: end; gap: 4px; }
+.filters { display: flex; gap: 6px; flex-wrap: wrap; }
+.filters button { border: 1px solid var(--line); background: var(--paper); border-radius: 99px; padding: 4px 12px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.filters button[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.stat { padding: 12px 16px; }
+.stat b { font-family: var(--f-display); font-size: 26px; font-weight: 800; display: block; line-height: 1.1; font-variation-settings: "wdth" 80; font-variant-numeric: tabular-nums; }
+.stat span { font-size: 13px; color: var(--muted); }
+
+/* Hoja de libro (texto para transcribir) */
+.overlay { position: fixed; inset: 0; z-index: 40; background: rgba(8, 16, 26, .55); display: flex; align-items: flex-end; justify-content: center; padding-top: calc(env(safe-area-inset-top, 0px) + 24px); }
+@media (min-width: 760px) { .overlay { align-items: center; padding: 24px; } }
+.modal { background: var(--paper); width: 100%; max-width: 760px; max-height: 100%; overflow: auto; border-radius: 18px 18px 0 0; box-shadow: var(--shadow-lg); padding-bottom: env(safe-area-inset-bottom, 0px); }
+@media (min-width: 760px) { .modal { border-radius: 18px; max-height: calc(100vh - 48px); } }
+.modal-h { position: sticky; top: 0; z-index: 2; background: var(--paper); display: flex; align-items: center; gap: 10px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+.modal-h h2 { font-size: 19px; font-weight: 800; flex: 1; font-variation-settings: "wdth" 85; }
+.modal-b { padding: 16px 18px 20px; display: grid; gap: 14px; }
+.close { border: 0; background: var(--paper-2); width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; }
+.sheet { font-family: var(--f-serif); font-size: 15.5px; line-height: 28px; white-space: pre-wrap; word-wrap: break-word;
+  background-color: var(--sheet); background-image: repeating-linear-gradient(to bottom, transparent 0 27px, var(--rule) 27px 28px);
+  background-position: 0 14px; border: 1px solid var(--line); border-radius: 6px; padding: 14px 16px 14px 46px; position: relative; overflow-x: auto; }
+.sheet::before { content: ""; position: absolute; top: 0; bottom: 0; left: 34px; border-left: 2px solid var(--margin-rule); opacity: .7; }
+.folio-box { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: end; padding: 12px; border-radius: var(--r-sm); background: var(--paper-2); border: 1px solid var(--line); }
+.note { font-size: 13px; color: var(--muted); }
+.confirm { border: 1px solid var(--signal); background: var(--signal-soft); border-radius: var(--r-sm); padding: 12px 14px; display: grid; gap: 10px; }
+.confirm p { margin: 0; font-size: 14px; }
+
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom, 0px) + 84px); z-index: 60; background: var(--ink); color: var(--paper); padding: 10px 16px; border-radius: 10px; font-weight: 600; font-size: 14px; box-shadow: var(--shadow-lg); max-width: calc(100% - 32px); }
+@media (min-width: 900px) { .toast { bottom: 28px; } }
+.empty { padding: 28px 18px; text-align: center; color: var(--muted); }
+.kv { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px 14px; }
+.logo-prev { width: 64px; height: 64px; border-radius: 10px; border: 1px dashed var(--line); display: grid; place-items: center; overflow: hidden; background: var(--paper-2); }
+.logo-prev img { max-width: 100%; max-height: 100%; }
+@media (prefers-reduced-motion: no-preference) {
+  .modal { animation: up .22s ease-out; }
+  @keyframes up { from { transform: translateY(18px); opacity: .6; } to { transform: none; opacity: 1; } }
+  .ring circle.prog { transition: stroke-dashoffset .35s ease; }
+}
+</style>
+
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h11l3 3v15H5z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>
+      </div>
+      <div class="brand-txt">
+        <div class="brand-name">BitaObra</div>
+        <div class="brand-sub" id="hdr-sub">Apoyo a la bitácora de obra</div>
+      </div>
+    </div>
+    <div class="top-spacer"></div>
+    <span class="chip-demo" id="hdr-demo" hidden>Datos de ejemplo</span>
+    <button class="icon-btn" id="btn-theme" aria-label="Cambiar entre modo claro y oscuro" title="Modo claro u oscuro">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="shell">
+  <nav class="nav" aria-label="Secciones">
+    <button data-view="hoy"><span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></span>Hoy</button>
+    <button data-view="actas"><span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h4"/></svg></span>Actas</button>
+    <button data-view="bitacora"><span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h6a2 2 0 0 1 2 2v14a2 2 0 0 0-2-2H4z"/><path d="M20 4h-6a2 2 0 0 0-2 2v14a2 2 0 0 1 2-2h6z"/></svg></span>Bitácora</button>
+    <button data-view="proyecto"><span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V9l7-5 7 5v12"/><path d="M10 21v-6h4v6"/></svg></span>Proyecto</button>
+  </nav>
+  <main id="main" tabindex="-1"></main>
+</div>
+<div id="layer"></div>
+
+<script src="vendor/jspdf.umd.min.js"></script>
+<script>
+"use strict";
+/* =====================================================================
+   BitaObra v2 · apoyo a la bitácora de obra
+   La app no reemplaza el libro: prepara el acta, mide su completitud
+   con la lista de verificación del trabajo de grado (Anexo 1) y entrega
+   el texto para transcribir y el PDF para anexar al folio.
+   ===================================================================== */
+
+// ---------- Utilidades ----------
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const has = v => v !== undefined && v !== null && String(v).trim() !== "";
+const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+const pad = (n, w = 3) => String(n).padStart(w, "0");
+const hoyISO = () => isoDe(new Date());
+function isoDe(d) { const z = new Date(d.getTime() - d.getTimezoneOffset() * 60000); return z.toISOString().slice(0, 10); }
+function sumarDias(iso, n) { const d = new Date(iso + "T12:00:00"); d.setDate(d.getDate() + n); return isoDe(d); }
+function difDias(a, b) { return Math.round((new Date(b + "T12:00:00") - new Date(a + "T12:00:00")) / 86400000); }
+const MESES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+const DIAS = ["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
+function fLarga(iso) { if (!has(iso)) return "—"; const d = new Date(iso + "T12:00:00"); return `${DIAS[d.getDay()]} ${d.getDate()} de ${MESES[d.getMonth()]} de ${d.getFullYear()}`; }
+function fCorta(iso) { if (!has(iso)) return "—"; const d = new Date(iso + "T12:00:00"); return `${d.getDate()} ${MESES[d.getMonth()].slice(0, 3)}. ${d.getFullYear()}`; }
+const num = v => { const n = parseFloat(String(v).replace(",", ".")); return isNaN(n) ? 0 : n; };
+const fNum = (v, dec = 2) => new Intl.NumberFormat("es-CO", { maximumFractionDigits: dec }).format(v);
+const fCOP = v => new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(v);
+const enIframe = (() => { try { return window.self !== window.top; } catch (e) { return true; } })();
+
+// ---------- Almacenamiento (IndexedDB, con respaldo en memoria) ----------
+const Store = (() => {
+  let db = null;
+  function open() {
+    return new Promise(res => {
+      try {
+        const rq = indexedDB.open("bitaobra-v2", 1);
+        rq.onupgradeneeded = () => rq.result.createObjectStore("kv");
+        rq.onsuccess = () => { db = rq.result; res(); };
+        rq.onerror = () => res();
+      } catch (e) { res(); }
+    });
+  }
+  function get(k) {
+    return new Promise(res => {
+      if (!db) return res(null);
+      try { const rq = db.transaction("kv").objectStore("kv").get(k); rq.onsuccess = () => res(rq.result ?? null); rq.onerror = () => res(null); } catch (e) { res(null); }
+    });
+  }
+  function set(k, v) {
+    return new Promise(res => {
+      if (!db) return res(false);
+      try { const tx = db.transaction("kv", "readwrite"); tx.objectStore("kv").put(v, k); tx.oncomplete = () => res(true); tx.onerror = () => res(false); } catch (e) { res(false); }
+    });
+  }
+  return { open, get, set };
+})();
+
+// ---------- Definición de las actas ----------
+// Cada criterio corresponde a la lista de verificación del Anexo 1 del documento.
+const CLIMA = ["Soleado", "Nublado", "Lluvia ligera", "Lluvia fuerte"];
+const UNIDADES = ["m³", "m²", "m", "kg", "und", "gl", "día"];
+const firmantesCampo = { k: "firmantes", ty: "list", add: "Agregar firmante", f: [{ k: "nom", l: "Nombre" }, { k: "cargo", l: "Cargo y parte", ph: "Interventor, interventoría" }] };
+const datosComunes = { t: "Lugar y fecha", c: ["F1", "F2"], campos: [{ k: "lugar", l: "Lugar" }, { k: "fecha", l: "Fecha del acta", ty: "date" }] };
+const firmasComunes = { t: "Firmas", c: ["F3"], campos: [firmantesCampo] };
+
+const TIPOS = {
+  diaria: {
+    nombre: "Acta diaria", desc: "Asiento de la jornada para la bitácora.",
+    secciones: [
+      { t: "Jornada", c: ["D1", "D2"], campos: [{ k: "fecha", l: "Fecha de la jornada", ty: "date" }, { k: "horaIni", l: "Hora de inicio", ty: "time" }, { k: "horaFin", l: "Hora de fin", ty: "time" }] },
+      { t: "Clima", c: ["D3"], campos: [{ k: "climaAm", l: "Mañana", ty: "select", op: CLIMA }, { k: "climaPm", l: "Tarde", ty: "select", op: CLIMA }, { k: "climaAfecta", l: "¿Afectó la obra?", ph: "No / Sí: se detuvo la fundida de 15:00 a 16:30", wide: true }] },
+      { t: "Personal", c: ["D4"], campos: [{ k: "personal", ty: "list", add: "Agregar categoría", f: [{ k: "cat", l: "Categoría", ty: "select", op: ["Ingeniero residente", "Maestro de obra", "Oficial", "Ayudante", "Operador", "Inspector SST", "Otro"] }, { k: "n", l: "Cantidad", ty: "number" }] }] },
+      { t: "Equipos", c: ["D5"], campos: [{ k: "equipos", ty: "list", add: "Agregar equipo", f: [{ k: "eq", l: "Equipo" }, { k: "est", l: "Estado", ty: "select", op: ["Operativo", "Varado", "En mantenimiento"] }] }] },
+      { t: "Actividades ejecutadas", c: ["D6", "D7"], campos: [{ k: "actividades", ty: "list", add: "Agregar actividad", f: [{ k: "desc", l: "Actividad" }, { k: "loc", l: "Localización", ph: "Eje B entre 2 y 4" }, { k: "cant", l: "Cantidad", ty: "number" }, { k: "und", l: "Unidad", ty: "select", op: UNIDADES }] }] },
+      { t: "Materiales y ensayos", c: ["D8"], campos: [{ k: "materiales", l: "Materiales recibidos o ensayos realizados", ty: "textarea", ph: "Escriba «Ninguno» si no hubo", wide: true }] },
+      { t: "Órdenes y observaciones de la interventoría", c: ["D9"], campos: [{ k: "ordenes", l: "Órdenes y observaciones", ty: "textarea", ph: "Escriba «Ninguna» si no hubo", wide: true }] },
+      { t: "Seguridad y ambiente", c: ["D10"], campos: [{ k: "sst", l: "Novedades de SST o ambientales", ty: "textarea", ph: "«Sin novedad» o describa el hecho", wide: true }] },
+      { t: "Registro fotográfico", c: ["D11"], fotos: true },
+      { t: "Firmas", c: ["D12"], campos: [firmantesCampo] }
+    ]
+  },
+  inicio: {
+    nombre: "Acta de inicio", desc: "Verifica los requisitos previos y fija el plazo.",
+    secciones: [
+      datosComunes,
+      { t: "Requisitos previos", c: ["I1", "I2", "I3", "I4"], campos: [
+        { k: "garantia", l: "Garantía aprobada", ty: "check", ref: "N.º de póliza y fecha de aprobación" },
+        { k: "rp", l: "Registro presupuestal", ty: "check", ref: "N.º y fecha del registro" },
+        { k: "personal", l: "Personal mínimo aprobado", ty: "check", ref: "Comunicación de aprobación" },
+        { k: "programacion", l: "Programación de obra aprobada", ty: "check", ref: "Versión aprobada" },
+        { k: "seguridad", l: "Afiliación del personal a seguridad social", ty: "check", ref: "Planilla o certificado" }] },
+      { t: "Plazo", c: ["I5"], campos: [{ k: "fechaInicio", l: "Fecha de inicio", ty: "date" }, { calc: "plazoInicio" }] },
+      firmasComunes
+    ]
+  },
+  comite: {
+    nombre: "Acta de comité de obra", desc: "Avance, temas tratados y compromisos.",
+    secciones: [
+      datosComunes,
+      { t: "Asistentes", c: ["C1"], campos: [{ k: "asistentes", ty: "list", add: "Agregar asistente", f: [{ k: "nom", l: "Nombre" }, { k: "cargo", l: "Cargo" }, { k: "emp", l: "Entidad o empresa" }] }] },
+      { t: "Avance", c: ["C2"], campos: [{ k: "avProg", l: "Avance programado (%)", ty: "number" }, { k: "avEje", l: "Avance ejecutado (%)", ty: "number" }, { calc: "desfase" }] },
+      { t: "Temas tratados", c: ["C3"], campos: [{ k: "temas", l: "Temas", ty: "textarea", wide: true }] },
+      { t: "Compromisos", c: ["C4"], campos: [{ k: "compromisos", ty: "list", add: "Agregar compromiso", f: [{ k: "que", l: "Compromiso" }, { k: "quien", l: "Responsable" }, { k: "cuando", l: "Fecha", ty: "date" }] }] },
+      firmasComunes
+    ]
+  },
+  suspension: {
+    nombre: "Acta de suspensión", desc: "Causa, estado de la obra y condición de reinicio.",
+    secciones: [
+      datosComunes,
+      { t: "Causa", c: ["S1"], campos: [{ k: "causa", l: "Causa", ty: "select", op: ["Fuerza mayor", "Caso fortuito", "Mutuo acuerdo por interés público", "Otra"] }, { k: "soporte", l: "Hechos y soporte", ty: "textarea", wide: true, ph: "Qué ocurrió y qué documento lo soporta" }] },
+      { t: "Fecha y plazo", c: ["S2"], campos: [{ k: "fechaSusp", l: "Fecha de suspensión", ty: "date" }, { calc: "plazoSusp" }] },
+      { t: "Estado de la obra", c: ["S3"], campos: [{ k: "avance", l: "Avance físico a la fecha (%)", ty: "number" }, { k: "estado", l: "Estado de la obra", ty: "textarea", wide: true }] },
+      { t: "Protección de la obra", c: ["S4"], campos: [{ k: "medidas", l: "Medidas durante la suspensión", ty: "textarea", wide: true }] },
+      { t: "Reinicio previsto", c: ["S5", "S6"], campos: [{ k: "condicion", l: "Fecha o condición para reiniciar", wide: true }, { k: "garantias", l: "El contratista actualizará las garantías", ty: "check" }] },
+      firmasComunes
+    ]
+  },
+  reinicio: {
+    nombre: "Acta de reinicio", desc: "Reanuda el plazo y recalcula la terminación.",
+    secciones: [
+      datosComunes,
+      { t: "Suspensión que se levanta", c: ["R1"], campos: [{ k: "refSusp", l: "Acta de suspensión", ty: "susp" }] },
+      { t: "Reinicio", c: ["R2", "R3"], campos: [{ k: "fechaReinicio", l: "Fecha de reinicio", ty: "date" }, { calc: "reinicio" }] },
+      { t: "Garantías", c: ["R4"], campos: [{ k: "garantiasAct", l: "Garantías actualizadas", ty: "check", ref: "N.º de modificación de la póliza" }] },
+      firmasComunes
+    ]
+  },
+  recibo: {
+    nombre: "Acta de recibo parcial", desc: "Cantidades del periodo y valor acumulado.",
+    secciones: [
+      datosComunes,
+      { t: "Periodo", c: ["P1"], campos: [{ k: "desde", l: "Desde", ty: "date" }, { k: "hasta", l: "Hasta", ty: "date" }] },
+      { t: "Cantidades recibidas", c: ["P2"], campos: [{ k: "items", ty: "list", add: "Agregar ítem", f: [{ k: "item", l: "Ítem" }, { k: "desc", l: "Descripción" }, { k: "und", l: "Unidad", ty: "select", op: UNIDADES }, { k: "cant", l: "Cantidad", ty: "number" }, { k: "vu", l: "Valor unitario", ty: "number" }] }] },
+      { t: "Valores", c: ["P3"], campos: [{ k: "acumAnt", l: "Valor acumulado de actas anteriores", ty: "number" }, { calc: "valores" }] },
+      { t: "Calidad", c: ["P4"], campos: [{ k: "obsCalidad", l: "Observaciones de calidad", ty: "textarea", wide: true, ph: "Ensayos, pruebas y estado de lo recibido" }] },
+      firmasComunes
+    ]
+  }
+};
+const ORDEN_FUNC = ["inicio", "comite", "suspension", "reinicio", "recibo"];
+
+const CRIT = {
+  D1: ["Fecha y consecutivo", r => has(r.datos.fecha)],
+  D2: ["Horario", r => has(r.datos.horaIni) && has(r.datos.horaFin)],
+  D3: ["Clima", r => has(r.datos.climaAm) && has(r.datos.climaPm) && has(r.datos.climaAfecta)],
+  D4: ["Personal", r => filas(r, "personal", ["cat", "n"])],
+  D5: ["Equipos", r => filas(r, "equipos", ["eq", "est"])],
+  D6: ["Actividades y localización", r => filas(r, "actividades", ["desc", "loc"])],
+  D7: ["Cantidades y unidades", r => filas(r, "actividades", ["cant", "und"])],
+  D8: ["Materiales y ensayos", r => has(r.datos.materiales)],
+  D9: ["Órdenes y observaciones", r => has(r.datos.ordenes)],
+  D10: ["Seguridad y ambiente", r => has(r.datos.sst)],
+  D11: ["Fotos", r => (r.fotos || []).length > 0],
+  D12: ["Firmantes", r => filas(r, "firmantes", ["nom", "cargo"], 2)],
+  F1: ["Datos del contrato", () => ["contrato", "objeto", "contratista", "interventoria"].every(k => has(S.proyecto[k]))],
+  F2: ["Lugar y fecha", r => has(r.datos.lugar) && has(r.datos.fecha)],
+  F3: ["Firmantes", r => filas(r, "firmantes", ["nom", "cargo"], 2)],
+  I1: ["Garantía", r => chk(r, "garantia")],
+  I2: ["Registro presupuestal", r => chk(r, "rp")],
+  I3: ["Personal y programación", r => chk(r, "personal") && chk(r, "programacion")],
+  I4: ["Seguridad social", r => chk(r, "seguridad")],
+  I5: ["Fechas y plazo", r => has(r.datos.fechaInicio) && num(S.proyecto.plazo) > 0],
+  C1: ["Asistentes", r => filas(r, "asistentes", ["nom", "cargo"], 2)],
+  C2: ["Avance", r => has(r.datos.avProg) && has(r.datos.avEje)],
+  C3: ["Temas", r => has(r.datos.temas)],
+  C4: ["Compromisos", r => filas(r, "compromisos", ["que", "quien", "cuando"])],
+  S1: ["Causa y soporte", r => has(r.datos.causa) && has(r.datos.soporte)],
+  S2: ["Fecha y plazo ejecutado", r => has(r.datos.fechaSusp) && has(S.proyecto.fechaInicio)],
+  S3: ["Estado de la obra", r => has(r.datos.avance) && has(r.datos.estado)],
+  S4: ["Medidas de protección", r => has(r.datos.medidas)],
+  S5: ["Condición de reinicio", r => has(r.datos.condicion)],
+  S6: ["Garantías", r => !!r.datos.garantias],
+  R1: ["Acta de suspensión", r => has(r.datos.refSusp)],
+  R2: ["Fecha y días suspendidos", r => has(r.datos.fechaReinicio) && !!suspDe(r)],
+  R3: ["Nueva terminación", r => !!calcReinicio(r)],
+  R4: ["Garantías actualizadas", r => chk(r, "garantiasAct")],
+  P1: ["Periodo", r => has(r.datos.desde) && has(r.datos.hasta)],
+  P2: ["Ítems completos", r => filas(r, "items", ["item", "desc", "und", "cant", "vu"])],
+  P3: ["Valor y acumulado", r => filas(r, "items", ["cant", "vu"]) && has(r.datos.acumAnt) && num(S.proyecto.valor) > 0],
+  P4: ["Observaciones de calidad", r => has(r.datos.obsCalidad)]
+};
+function filas(r, k, campos, min = 1) { const a = r.datos[k] || []; return a.length >= min && a.every(f => campos.every(c => has(f[c]))); }
+function chk(r, k) { const v = r.datos[k]; return !!(v && v.ok && has(v.ref)); }
+function critDe(tipo) { return TIPOS[tipo].secciones.flatMap(s => s.c); }
+function evalua(r) {
+  const cods = critDe(r.tipo);
+  const res = cods.map(c => ({ c, t: CRIT[c][0], ok: !!CRIT[c][1](r) }));
+  const ok = res.filter(x => x.ok).length;
+  return { res, ok, total: res.length, pct: Math.round(100 * ok / res.length) };
+}
+
+// ---------- Cálculos de plazo y valores ----------
+function finOriginal() { const p = S.proyecto; return has(p.fechaInicio) && num(p.plazo) > 0 ? sumarDias(p.fechaInicio, num(p.plazo) - 1) : null; }
+function diasSuspendidosAntes(r) {
+  return S.registros.filter(x => x.tipo === "reinicio" && x.estado === "cerrado" && x.id !== r.id).reduce((a, x) => { const c = calcReinicio(x, true); return a + (c ? c.dias : 0); }, 0);
+}
+function suspDe(r) { return S.registros.find(x => x.id === r.datos.refSusp && x.tipo === "suspension"); }
+function calcReinicio(r, sinAcumular) {
+  const s = suspDe(r); const fin = finOriginal();
+  if (!s || !has(s.datos.fechaSusp) || !has(r.datos.fechaReinicio) || !fin) return null;
+  const dias = difDias(s.datos.fechaSusp, r.datos.fechaReinicio);
+  if (dias < 0) return null;
+  const prev = sinAcumular ? 0 : diasSuspendidosAntes(r);
+  return { dias, nuevaFin: sumarDias(fin, prev + dias), prev };
+}
+function calcValores(r) {
+  const items = r.datos.items || [];
+  const valorActa = items.reduce((a, i) => a + num(i.cant) * num(i.vu), 0);
+  const acum = num(r.datos.acumAnt) + valorActa;
+  const vc = num(S.proyecto.valor);
+  return { valorActa, acum, pct: vc ? 100 * acum / vc : 0, saldo: vc - acum, vc };
+}
+function calcHtml(tipo, r) {
+  const p = S.proyecto;
+  if (tipo === "plazoInicio") {
+    if (!has(r.datos.fechaInicio) || !num(p.plazo)) return `Defina la fecha de inicio y el plazo del contrato (pestaña Proyecto) para calcular la terminación.`;
+    return `Plazo: ${p.plazo} días calendario · Terminación prevista: <b>${fLarga(sumarDias(r.datos.fechaInicio, num(p.plazo) - 1))}</b>`;
+  }
+  if (tipo === "plazoSusp") {
+    if (!has(r.datos.fechaSusp) || !has(p.fechaInicio)) return `El plazo ejecutado se calcula con la fecha de inicio del contrato.`;
+    const ej = difDias(p.fechaInicio, r.datos.fechaSusp);
+    return `Plazo ejecutado a la fecha: <b>${ej} de ${p.plazo} días</b> <span style="white-space:nowrap">(${fNum(100 * ej / num(p.plazo), 1)} %)</span>`;
+  }
+  if (tipo === "desfase") {
+    if (!has(r.datos.avProg) || !has(r.datos.avEje)) return `El desfase se calcula con los dos avances.`;
+    const d = num(r.datos.avEje) - num(r.datos.avProg);
+    return `Desfase: <b>${d >= 0 ? "+" : ""}${fNum(d, 1)} puntos</b> ${d < 0 ? "(atraso)" : "(al día o adelantado)"}`;
+  }
+  if (tipo === "reinicio") {
+    const c = calcReinicio(r);
+    if (!c) return `Elija el acta de suspensión y la fecha de reinicio. Se requiere la fecha de inicio del contrato.`;
+    return `Días suspendidos: <b>${c.dias}</b>${c.prev ? ` (más ${c.prev} de suspensiones anteriores)` : ""} · Nueva terminación: <b>${fLarga(c.nuevaFin)}</b>`;
+  }
+  if (tipo === "valores") {
+    const v = calcValores(r);
+    if (!v.vc) return `Registre el valor del contrato en la pestaña Proyecto.`;
+    return `Valor de esta acta: <b>${fCOP(v.valorActa)}</b> · Acumulado: <b>${fCOP(v.acum)}</b> (${fNum(v.pct, 1)} % del contrato) · Saldo: ${fCOP(v.saldo)}`;
+  }
+  return "";
+}
+
+// ---------- Texto para la bitácora ----------
+function encabezado(r) {
+  const p = S.proyecto;
+  const num = r.consecutivo ? `REGISTRO N.º ${pad(r.consecutivo)}` : "BORRADOR (sin consecutivo)";
+  return `CONTRATO ${p.contrato || "—"} · ${num}\n${TIPOS[r.tipo].nombre.toUpperCase()} · ${fLarga(r.datos.fecha)}\n`;
+}
+function lineaFirmas(r) {
+  const f = (r.datos.firmantes || []).filter(x => has(x.nom));
+  return f.length ? "\nFirman:\n" + f.map(x => `  ________________________  ${x.nom}, ${x.cargo || ""}`).join("\n") : "";
+}
+const PLURAL = { "Ingeniero residente": "ingenieros residentes", "Maestro de obra": "maestros de obra", "Oficial": "oficiales", "Ayudante": "ayudantes", "Operador": "operadores", "Inspector SST": "inspectores SST", "Otro": "otros" };
+function categoria(c, n) { if (!has(c)) return "sin categoría"; return n === 1 ? c.charAt(0).toLowerCase() + c.slice(1) : (PLURAL[c] || c.toLowerCase()); }
+function lista(arr, fn) { return (arr || []).map((x, i) => fn(x, i)).join("\n"); }
+function texto(r) {
+  const d = r.datos, p = S.proyecto;
+  const corr = r.corrige ? (() => { const o = S.registros.find(x => x.id === r.corrige); return o ? `Este registro corrige el registro N.º ${pad(o.consecutivo || 0)}.\n` : ""; })() : "";
+  let t = encabezado(r) + corr;
+  const comunes = `Lugar: ${d.lugar || "—"}. Contrato ${p.contrato || "—"}, cuyo objeto es ${p.objeto || "—"}. Contratista: ${p.contratista || "—"}. Interventoría: ${p.interventoria || "—"}.`;
+  if (r.tipo === "diaria") {
+    const per = d.personal || []; const tot = per.reduce((a, x) => a + num(x.n), 0);
+    t += `Horario: ${d.horaIni || "—"} a ${d.horaFin || "—"}.\n`;
+    t += `Clima: mañana ${(d.climaAm || "—").toLowerCase()}, tarde ${(d.climaPm || "—").toLowerCase()}. ${d.climaAfecta || ""}\n`;
+    t += `Personal (${tot}): ${per.map(x => `${x.n || "?"} ${categoria(x.cat, num(x.n))}`).join(", ") || "—"}.\n`;
+    t += `Equipos: ${(d.equipos || []).map(x => `${x.eq} (${has(x.est) ? x.est.toLowerCase() : "estado sin registrar"})`).join("; ") || "—"}.\n`;
+    t += `Actividades ejecutadas:\n${lista(d.actividades, (a, i) => `  ${i + 1}. ${a.desc || "—"}, ${a.loc || "sin localización"}: ${has(a.cant) ? `${fNum(num(a.cant))} ${a.und || ""}` : "cantidad sin registrar"}.`) || "  —"}\n`;
+    t += `Materiales y ensayos: ${d.materiales || "—"}\n`;
+    t += `Órdenes y observaciones de la interventoría: ${d.ordenes || "—"}\n`;
+    t += `Seguridad y ambiente: ${d.sst || "—"}\n`;
+    t += `Registro fotográfico: ${(r.fotos || []).length === 1 ? "1 foto" : (r.fotos || []).length + " fotos"} en el PDF anexo a este registro.\n`;
+  } else if (r.tipo === "inicio") {
+    t += comunes + "\nLa interventoría verificó los requisitos previos a la ejecución:\n";
+    const req = TIPOS.inicio.secciones[1].campos;
+    t += req.map(c => { const v = d[c.k] || {}; return `  [${v.ok ? "X" : " "}] ${c.l}${has(v.ref) ? `: ${v.ref}` : ""}.`; }).join("\n") + "\n";
+    t += `Las partes acuerdan dar inicio a la ejecución el ${fLarga(d.fechaInicio)}, con un plazo de ${p.plazo || "—"} días calendario`;
+    t += has(d.fechaInicio) && num(p.plazo) ? `, por lo que la terminación prevista es el ${fLarga(sumarDias(d.fechaInicio, num(p.plazo) - 1))}.\n` : ".\n";
+  } else if (r.tipo === "comite") {
+    t += comunes + "\n";
+    t += `Asistentes:\n${lista(d.asistentes, a => `  - ${a.nom}, ${a.cargo}${has(a.emp) ? ` (${a.emp})` : ""}.`) || "  —"}\n`;
+    t += `Avance programado: ${has(d.avProg) ? fNum(num(d.avProg), 1) + " %" : "—"}. Avance ejecutado: ${has(d.avEje) ? fNum(num(d.avEje), 1) + " %" : "—"}.\n`;
+    t += `Temas tratados: ${d.temas || "—"}\n`;
+    t += `Compromisos:\n${lista(d.compromisos, (c, i) => `  ${i + 1}. ${c.que}. Responsable: ${c.quien}. Fecha: ${fCorta(c.cuando)}.`) || "  —"}\n`;
+  } else if (r.tipo === "suspension") {
+    t += comunes + "\n";
+    const ej = has(d.fechaSusp) && has(p.fechaInicio) ? difDias(p.fechaInicio, d.fechaSusp) : null;
+    t += `Las partes suspenden la ejecución a partir del ${fLarga(d.fechaSusp)} por ${(d.causa || "—").toLowerCase()}. ${d.soporte || ""}\n`;
+    t += `Plazo ejecutado a la fecha: ${ej !== null ? `${ej} de ${p.plazo} días` : "—"}. Avance físico: ${has(d.avance) ? fNum(num(d.avance), 1) + " %" : "—"}.\n`;
+    t += `Estado de la obra: ${d.estado || "—"}\n`;
+    t += `Medidas de protección durante la suspensión: ${d.medidas || "—"}\n`;
+    t += `La obra se reiniciará: ${d.condicion || "—"}.\n`;
+    t += d.garantias ? `El contratista se compromete a actualizar las garantías del contrato.\n` : "";
+  } else if (r.tipo === "reinicio") {
+    t += comunes + "\n";
+    const s = suspDe(r); const c = calcReinicio(r);
+    t += `Se levanta la suspensión ordenada en el registro N.º ${s ? pad(s.consecutivo || 0) : "—"} del ${s ? fLarga(s.datos.fechaSusp) : "—"}.\n`;
+    t += `La ejecución se reinicia el ${fLarga(d.fechaReinicio)}, después de ${c ? c.dias : "—"} días de suspensión.\n`;
+    t += `Nueva fecha de terminación: ${c ? fLarga(c.nuevaFin) : "—"}.\n`;
+    const g = d.garantiasAct || {};
+    t += g.ok ? `Garantías actualizadas${has(g.ref) ? `: ${g.ref}` : ""}.\n` : `Garantías: pendientes de actualizar.\n`;
+  } else if (r.tipo === "recibo") {
+    t += comunes + "\n";
+    const v = calcValores(r);
+    t += `Periodo: del ${fCorta(d.desde)} al ${fCorta(d.hasta)}.\nCantidades recibidas:\n`;
+    t += lista(d.items, i => `  ${i.item || "—"} ${i.desc || ""}: ${fNum(num(i.cant))} ${i.und || ""} × ${fCOP(num(i.vu))} = ${fCOP(num(i.cant) * num(i.vu))}`) || "  —";
+    t += `\nValor de esta acta: ${fCOP(v.valorActa)}. Acumulado: ${fCOP(v.acum)} (${fNum(v.pct, 1)} % del valor del contrato, ${fCOP(v.vc)}). Saldo: ${fCOP(v.saldo)}.\n`;
+    t += `Observaciones de calidad: ${d.obsCalidad || "—"}\n`;
+  }
+  return t + lineaFirmas(r);
+}
+
+// ---------- Estado ----------
+let S = null;
+const ui = { view: "hoy", abierto: null, filtro: "todos", confirmar: false };
+let tGuardar = null;
+function guardar() { clearTimeout(tGuardar); tGuardar = setTimeout(() => Store.set("estado", S), 250); }
+function toast(msg) {
+  const el = document.createElement("div"); el.className = "toast"; el.setAttribute("role", "status"); el.textContent = msg;
+  document.body.appendChild(el); setTimeout(() => el.remove(), 2600);
+}
+function proximoConsecutivo() { return S.registros.reduce((m, r) => Math.max(m, r.consecutivo || 0), 0) + 1; }
+function nuevoRegistro(tipo, base = {}) {
+  const p = S.proyecto;
+  const r = { id: uid(), tipo, estado: "borrador", consecutivo: null, folio: "", fotos: [], creado: new Date().toISOString(),
+    datos: Object.assign({ fecha: hoyISO(), lugar: p.lugar || "", firmantes: firmantesDefecto() }, base) };
+  if (tipo === "diaria") Object.assign(r.datos, { horaIni: "07:00", horaFin: "17:00", personal: [], equipos: [], actividades: [] });
+  if (tipo === "inicio") r.datos.fechaInicio = hoyISO();
+  if (tipo === "suspension") r.datos.fechaSusp = hoyISO();
+  if (tipo === "reinicio") { r.datos.fechaReinicio = hoyISO(); const s = S.registros.filter(x => x.tipo === "suspension" && x.estado === "cerrado").pop(); if (s) r.datos.refSusp = s.id; }
+  if (tipo === "recibo") { r.datos.items = []; r.datos.acumAnt = String(acumuladoCerrado()); }
+  S.registros.push(r); guardar(); return r;
+}
+function acumuladoCerrado() { return S.registros.filter(x => x.tipo === "recibo" && x.estado === "cerrado").reduce((a, x) => a + calcValores(x).valorActa, 0); }
+function firmantesDefecto() {
+  const p = S.proyecto, f = [];
+  if (has(p.residente)) f.push({ nom: p.residente, cargo: `Residente de obra, ${p.contratista || "contratista"}` });
+  if (has(p.interventor)) f.push({ nom: p.interventor, cargo: `Interventor, ${p.interventoria || "interventoría"}` });
+  return f;
+}
+function diariaDeHoy() { return S.registros.find(r => r.tipo === "diaria" && r.datos.fecha === hoyISO() && r.estado === "borrador") || S.registros.find(r => r.tipo === "diaria" && r.datos.fecha === hoyISO()); }
+
+// ---------- Ejemplo (contrato ficticio) ----------
+function ejemplo() {
+  const h = hoyISO(), d = n => sumarDias(h, -n);
+  const p = { demo: true, contrato: "OBRA-014-2026", objeto: "construcción de cuatro aulas y batería sanitaria en una institución educativa (ejemplo)", entidad: "Secretaría de Infraestructura (ejemplo)",
+    contratista: "Constructora Ejemplo S.A.S.", interventoria: "Interventorías del Huila (ejemplo)", residente: "Ing. Laura Medina", interventor: "Ing. Carlos Rojas",
+    lugar: "Neiva, Huila", valor: "1850000000", plazo: "180", fechaInicio: d(40), logo: "" };
+  S = { proyecto: p, registros: [] };
+  const firm = firmantesDefecto();
+  const R = (tipo, datos, extra) => { const r = Object.assign({ id: uid(), tipo, estado: "cerrado", folio: "", fotos: [], creado: new Date().toISOString(), datos: Object.assign({ lugar: p.lugar, firmantes: firm }, datos) }, extra); S.registros.push(r); return r; };
+  const ok = ref => ({ ok: true, ref });
+  R("inicio", { fecha: d(41), fechaInicio: d(40), garantia: ok("Póliza 45-44-101 aprobada el " + fCorta(d(44))), rp: ok("RP 2026-0312"), personal: ok("Oficio INT-003"), programacion: ok("Programación versión 2"), seguridad: ok("Planilla PILA de septiembre") }, { consecutivo: 1, folio: "1" });
+  const act = (desc, loc, cant, und) => ({ desc, loc, cant: String(cant), und });
+  const base = { horaIni: "07:00", horaFin: "17:00", climaAm: "Soleado", climaPm: "Nublado", climaAfecta: "No afectó la obra.",
+    personal: [{ cat: "Ingeniero residente", n: "1" }, { cat: "Maestro de obra", n: "1" }, { cat: "Oficial", n: "4" }, { cat: "Ayudante", n: "8" }],
+    equipos: [{ eq: "Mezcladora de 1 bulto", est: "Operativo" }, { eq: "Vibrador de concreto", est: "Operativo" }],
+    materiales: "Ninguno.", ordenes: "Ninguna.", sst: "Sin novedad." };
+  R("diaria", Object.assign({}, base, { fecha: d(12), actividades: [act("Excavación manual para zapatas", "Ejes A a C, entre 1 y 4", 18.5, "m³")] }), { consecutivo: 2, folio: "2" });
+  R("diaria", Object.assign({}, base, { fecha: d(11), climaPm: "Lluvia fuerte", climaAfecta: "Sí: se suspendió el vaciado de solados de 14:30 a 16:00.", actividades: [act("Solado de limpieza e=5 cm", "Zapatas eje A", 6.2, "m²"), act("Figurado de acero para zapatas", "Patio de acero", 420, "kg")], materiales: "Llegaron 120 bultos de cemento (remisión 8812)." }), { consecutivo: 3, folio: "3" });
+  R("comite", { fecha: d(8), asistentes: [{ nom: "Ing. Laura Medina", cargo: "Residente de obra", emp: "Constructora Ejemplo" }, { nom: "Ing. Carlos Rojas", cargo: "Interventor", emp: "Interventorías del Huila" }, { nom: "Arq. Diana Perdomo", cargo: "Supervisora", emp: "Secretaría de Infraestructura" }],
+    avProg: "18", avEje: "15.5", temas: "Atraso en cimentación por lluvias de la semana anterior. Revisión del plan de contingencia y del suministro de acero.", compromisos: [{ que: "Presentar plan de recuperación del atraso", quien: "Contratista", cuando: d(4) }, { que: "Aprobar diseño de mezcla de 3000 psi", quien: "Interventoría", cuando: d(5) }] }, { consecutivo: 4, folio: "4" });
+  R("diaria", Object.assign({}, base, { fecha: d(1), actividades: [act("Concreto para zapatas 3000 psi", "Zapatas eje B, entre 1 y 4", 9.6, "m³")], materiales: "Ensayo de asentamiento: 10 cm. Se tomaron 6 cilindros (muestra M-07).", ordenes: "Curar las zapatas durante 7 días con agua.", sst: "Sin novedad." }), { consecutivo: 5, folio: "" });
+  // Borrador de hoy, a medio llenar para mostrar el medidor
+  const hoy = { id: uid(), tipo: "diaria", estado: "borrador", consecutivo: null, folio: "", fotos: [], creado: new Date().toISOString(),
+    datos: { fecha: h, lugar: p.lugar, firmantes: firm, horaIni: "07:00", horaFin: "17:00", climaAm: "Soleado", climaPm: "", climaAfecta: "",
+      personal: [{ cat: "Ingeniero residente", n: "1" }, { cat: "Oficial", n: "4" }, { cat: "Ayudante", n: "7" }], equipos: [{ eq: "Mezcladora de 1 bulto", est: "Operativo" }, { eq: "Vibrador de concreto", est: "" }],
+      actividades: [act("Desencofrado de zapatas", "Eje B, entre 1 y 4", 8, "und"), { desc: "Armado de columnas", loc: "", cant: "", und: "" }], materiales: "", ordenes: "Verificar recubrimiento de 7,5 cm en columnas antes de cerrar formaleta.", sst: "" } };
+  S.registros.push(hoy);
+  S.registros[1].fotos = [fotoEjemplo("Excavación eje B", d(12), "#8d6e4b"), fotoEjemplo("Zapata Z-B2", d(12), "#6f6a63")];
+  S.registros[4].fotos = [fotoEjemplo("Vaciado zapata Z-B3", d(1), "#7a7d82"), fotoEjemplo("Toma de cilindros", d(1), "#5f7287")];
+}
+function fotoEjemplo(txt, fecha, color) {
+  // Imagen de relleno dibujada en canvas: el ejemplo no trae fotos reales.
+  const c = document.createElement("canvas"); c.width = 480; c.height = 360; const g = c.getContext("2d");
+  const gr = g.createLinearGradient(0, 0, 480, 360); gr.addColorStop(0, color); gr.addColorStop(1, "#2b3036"); g.fillStyle = gr; g.fillRect(0, 0, 480, 360);
+  g.strokeStyle = "rgba(255,255,255,.18)"; g.lineWidth = 2; for (let x = -360; x < 480; x += 40) { g.beginPath(); g.moveTo(x, 360); g.lineTo(x + 360, 0); g.stroke(); }
+  g.fillStyle = "rgba(255,255,255,.9)"; g.font = "600 26px sans-serif"; g.fillText(txt, 24, 300); g.font = "16px monospace"; g.fillText("FOTO DE EJEMPLO", 24, 40);
+  return { src: c.toDataURL("image/jpeg", .8), fecha: fecha + "T10:30", lat: 2.9273, lon: -75.2819, nombre: txt };
+}
+
+// ---------- Íconos ----------
+const I = {
+  plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  x: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  book: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h6a2 2 0 0 1 2 2v14a2 2 0 0 0-2-2H4z"/><path d="M20 4h-6a2 2 0 0 0-2 2v14a2 2 0 0 1 2-2h6z"/></svg>',
+  lock: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
+  cam: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>',
+  img: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 17l-5-5-9 8"/></svg>',
+  copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg>',
+  pdf: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4M12 11v6M9.5 14.5L12 17l2.5-2.5"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>',
+  t: {
+    inicio: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg>',
+    comite: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="9" r="3"/><circle cx="16" cy="9" r="3"/><path d="M2 20c0-3 3-5 6-5s6 2 6 5M14 15c3 0 8 1 8 5"/></svg>',
+    suspension: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M10 9v6M14 9v6"/></svg>',
+    reinicio: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 3-6.2M4 4v4h4"/></svg>',
+    recibo: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>',
+    diaria: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>'
+  }
+};
+
+// ---------- Componentes ----------
+function ring(pct) {
+  const R = 40, C = 2 * Math.PI * R, col = pct >= 90 ? "var(--ok)" : pct >= 60 ? "var(--signal)" : "var(--bad)";
+  return `<div class="ring" role="img" aria-label="Completitud ${pct} por ciento"><svg viewBox="0 0 96 96"><circle cx="48" cy="48" r="${R}" fill="none" stroke="var(--line)" stroke-width="9"/><circle class="prog" cx="48" cy="48" r="${R}" fill="none" stroke="${col}" stroke-width="9" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C * (1 - pct / 100)}"/></svg><div class="val"><div><div class="num mono">${pct}%</div><div class="lbl">completa</div></div></div></div>`;
+}
+function pillPct(pct) { return `<span class="pill ${pct >= 90 ? "ok" : pct >= 60 ? "warn" : "bad"}">${pct} %</span>`; }
+function meterHtml(r) {
+  const e = evalua(r), falta = e.res.filter(x => !x.ok);
+  return `<div class="meter"><div class="meter-top">${ring(e.pct)}<div><div class="eyebrow">Contenidos mínimos</div><div style="font-weight:700;font-size:16px">${e.ok} de ${e.total} criterios</div>
+    ${falta.length ? `<div class="note">Toque un pendiente para ir al campo.</div>` : `<div class="pill ok" style="margin-top:6px">Lista para la bitácora</div>`}</div></div>
+    ${falta.length ? `<div class="missing">${falta.map(x => `<button class="miss" data-goto="${x.c}"><span class="mono">${x.c}</span>${esc(x.t)}</button>`).join("")}</div>` : ""}</div>`;
+}
+function inputHtml(c, val, path, ro) {
+  const id = `f-${path.replace(/[^a-z0-9]/gi, "-")}`;
+  const dis = ro ? " disabled" : "";
+  const ph = c.ph ? ` placeholder="${esc(c.ph)}"` : "";
+  let ctl;
+  if (c.ty === "textarea") ctl = `<textarea class="inp" id="${id}" data-p="${path}"${ph}${dis}>${esc(val)}</textarea>`;
+  else if (c.ty === "select") ctl = `<select class="inp" id="${id}" data-p="${path}"${dis}><option value="">Elegir…</option>${c.op.map(o => `<option${o === val ? " selected" : ""}>${esc(o)}</option>`).join("")}</select>`;
+  else if (c.ty === "susp") {
+    const ss = S.registros.filter(x => x.tipo === "suspension" && x.estado === "cerrado");
+    ctl = `<select class="inp" id="${id}" data-p="${path}"${dis}><option value="">${ss.length ? "Elegir…" : "No hay actas de suspensión cerradas"}</option>${ss.map(s => `<option value="${s.id}"${s.id === val ? " selected" : ""}>N.º ${pad(s.consecutivo)} · ${fCorta(s.datos.fechaSusp)}</option>`).join("")}</select>`;
+  }
+  else ctl = `<input class="inp" id="${id}" data-p="${path}" type="${c.ty === "number" ? "number" : c.ty || "text"}"${c.ty === "number" ? ' inputmode="decimal" step="any"' : ""} value="${esc(val)}"${ph}${dis}>`;
+  return `<div class="field${c.wide ? " wide" : ""}"><label for="${id}">${esc(c.l || "")}</label>${ctl}</div>`;
+}
+function campoHtml(c, r, ro) {
+  const d = r.datos;
+  if (c.calc) return `<div class="calc wide" data-calc="${c.calc}">${calcHtml(c.calc, r)}</div>`;
+  if (c.ty === "check") {
+    const v = d[c.k] || {}; const isObj = typeof v === "object";
+    const okv = isObj ? v.ok : !!v;
+    const id = `chk-${c.k}`;
+    return `<label class="chk field wide" for="${id}"><input type="checkbox" id="${id}" data-chk="${c.k}"${c.ref ? ' data-obj="1"' : ""}${okv ? " checked" : ""}${ro ? " disabled" : ""}><span class="chk-txt"><b>${esc(c.l)}</b>${c.ref ? `<input class="inp" data-p="${c.k}.ref" value="${esc(v.ref || "")}" placeholder="${esc(c.ref)}" aria-label="${esc(c.ref)}"${ro ? " disabled" : ""}>` : ""}</span></label>`;
+  }
+  if (c.ty === "list") {
+    const a = d[c.k] || [];
+    const rows = a.map((row, i) => `<div class="lrow">${c.f.map(f => inputHtml(f, row[f.k] || "", `${c.k}.${i}.${f.k}`, ro)).join("")}${ro ? "<span></span>" : `<button class="del" data-del="${c.k}.${i}" aria-label="Quitar fila">${I.x}</button>`}</div>`).join("");
+    return `<div class="field wide"><div class="list">${rows || `<div class="note">Sin filas todavía.</div>`}</div>${ro ? "" : `<div><button class="btn small ghost" data-addrow="${c.k}">${I.plus}${esc(c.add)}</button></div>`}</div>`;
+  }
+  return inputHtml(c, d[c.k] || "", c.k, ro);
+}
+function seccionesHtml(r) {
+  const ro = r.estado === "cerrado";
+  const e = evalua(r); const okDe = Object.fromEntries(e.res.map(x => [x.c, x.ok]));
+  return TIPOS[r.tipo].secciones.map((s, si) => {
+    const crit = `<span class="crit">${s.c.map(c => `<span class="${okDe[c] ? "on" : "off"}" title="${esc(CRIT[c][0])}">${c}</span>`).join("")}</span>`;
+    let body;
+    if (s.fotos) body = fotosHtml(r, ro);
+    else body = `<div class="fields">${s.campos.map(c => campoHtml(c, r, ro)).join("")}</div>`;
+    const nota = s.c.includes("F1") ? `<div class="note" style="margin-top:8px">El contrato, el objeto y las partes se toman de la pestaña Proyecto.</div>` : "";
+    return `<section class="sec" id="sec-${s.c[0]}" data-sec="${si}"><div class="sec-h"><h3>${esc(s.t)}</h3>${crit}</div>${body}${nota}</section>`;
+  }).join("");
+}
+function fotosHtml(r, ro) {
+  const f = r.fotos || [];
+  const grid = f.length ? `<div class="photos">${f.map((p, i) => `<div class="ph"><img src="${p.src}" alt="${esc(p.nombre || "Foto " + (i + 1))}"><div class="cap">${esc((p.fecha || "").replace("T", " ").slice(0, 16))}${p.lat ? ` · ${p.lat.toFixed(4)}, ${p.lon.toFixed(4)}` : ""}</div>${ro ? "" : `<button class="x" data-delfoto="${i}" aria-label="Quitar foto">${I.x}</button>`}</div>`).join("")}</div>` : `<div class="note">Sin fotos. Cada foto guarda su fecha y, si el teléfono lo permite, la ubicación.</div>`;
+  const add = ro ? "" : `<div class="add-ph"><label class="btn small file-lbl">${I.cam}Tomar foto<input type="file" accept="image/*" capture="environment" data-foto></label><label class="btn small file-lbl">${I.img}Adjuntar fotos<input type="file" accept="image/*" multiple data-foto></label></div>`;
+  return grid + add;
+}
+function editorHtml(r) {
+  const ro = r.estado === "cerrado";
+  const lock = ro ? `<div class="lock">${I.lock}<span>Registro N.º ${pad(r.consecutivo)} cerrado${r.folio ? ` · transcrito en el folio ${esc(r.folio)}` : " · falta anotar el folio del libro"}. Para corregirlo, cree un registro de corrección.</span></div>` : "";
+  const acciones = ro
+    ? `<button class="btn" data-corregir="${r.id}">Crear corrección</button><button class="btn primary" data-texto="${r.id}">${I.book}Texto y PDF para la bitácora</button>`
+    : `<button class="btn danger" data-borrar="${r.id}">Descartar borrador</button><button class="btn" data-texto="${r.id}">${I.book}Ver texto</button><button class="btn primary" data-cerrar="${r.id}">${I.lock}Cerrar registro</button>`;
+  return `<div class="card" data-editor="${r.id}">${lock}${seccionesHtml(r)}<div class="sheet-actions">${acciones}</div></div>`;
+}
+
+// ---------- Vistas ----------
+function vistaHoy() {
+  let r = diariaDeHoy();
+  const h = `<div class="page-head"><div><div class="eyebrow">${fLarga(hoyISO())}</div><h1>Acta diaria</h1></div>
+    ${r ? `<span class="pill ${r.estado === "cerrado" ? "accent" : "idle"}">${r.estado === "cerrado" ? `Registro N.º ${pad(r.consecutivo)}` : "Borrador"}</span>` : ""}</div>`;
+  if (!r) return h + `<div class="card empty"><p>Aún no ha empezado el acta de hoy.</p><button class="btn primary" data-nueva="diaria">${I.plus}Empezar el acta de hoy</button></div>`;
+  ui.abierto = r.id;
+  const pend = S.registros.filter(x => x.estado === "cerrado" && !has(x.folio));
+  return h + `<div class="today-grid"><div class="card pad g-meter" id="meter-box">${meterHtml(r)}</div><div class="g-ed">${editorHtml(r)}</div>
+    <aside class="g-help">
+      <div class="card pad"><div class="eyebrow">Cómo acompaña al libro</div>
+        <ol style="margin:8px 0 0;padding-left:20px;display:grid;gap:4px;font-size:14px">
+          <li>Llene el acta en campo; el medidor dice qué falta.</li><li>Cierre el registro: recibe su número consecutivo.</li><li>Transcriba o pegue el texto en el libro y fírmelo allí.</li><li>Anote aquí el folio del libro y anexe el PDF con las fotos.</li></ol></div>
+      ${pend.length ? `<button class="card pad" data-view-go="bitacora" style="text-align:left;border-color:var(--signal)"><div class="eyebrow" style="color:var(--signal)">Pendiente</div><b>${pend.length} registro${pend.length > 1 ? "s" : ""} sin folio del libro</b><div class="note">Toque para revisar en la bitácora.</div></button>` : ""}
+    </aside></div>`;
+}
+function vistaActas() {
+  if (ui.abierto) { const r = S.registros.find(x => x.id === ui.abierto); if (r) return vistaActa(r); ui.abierto = null; }
+  const borr = S.registros.filter(r => r.estado === "borrador" && r.tipo !== "diaria");
+  return `<div class="page-head"><div><div class="eyebrow">Actas funcionales</div><h1>¿Qué acta necesita?</h1></div></div>
+    <div class="types">${ORDEN_FUNC.map(t => `<button class="type" data-nueva="${t}"><span class="type-ico">${I.t[t]}</span><h3>${TIPOS[t].nombre}</h3><p>${TIPOS[t].desc}</p><span class="pill idle tag mono">${critDe(t).length} criterios</span></button>`).join("")}</div>
+    <div><div class="eyebrow" style="margin:6px 0 8px">Borradores</div>${borr.length ? `<div class="card ledger">${borr.map(entradaHtml).join("")}</div>` : `<div class="card empty">No hay actas en borrador.</div>`}</div>`;
+}
+function vistaActa(r) {
+  return `<div class="page-head"><div><button class="btn small ghost" data-volver style="padding-left:0">← Actas</button><h1>${TIPOS[r.tipo].nombre}</h1></div>
+    <span class="pill ${r.estado === "cerrado" ? "accent" : "idle"}">${r.estado === "cerrado" ? `Registro N.º ${pad(r.consecutivo)}` : "Borrador"}</span></div>
+    <div class="today-grid"><div class="card pad g-meter" id="meter-box">${meterHtml(r)}</div><div class="g-ed">${editorHtml(r)}</div></div>`;
+}
+function entradaHtml(r) {
+  const e = evalua(r);
+  const sub = r.tipo === "diaria" ? ((r.datos.actividades || []).map(a => a.desc).filter(Boolean).join(" · ") || "Sin actividades") : TIPOS[r.tipo].desc;
+  const folio = r.estado !== "cerrado" ? `<span class="pill idle">Borrador</span>` : has(r.folio) ? `<span class="pill ok">Folio ${esc(r.folio)}</span>` : `<span class="pill warn">Sin folio</span>`;
+  return `<button class="entry" data-abrir="${r.id}"><div class="folio-no">${r.consecutivo ? `<small>N.º</small><b>${pad(r.consecutivo)}</b>` : `<small>Borr.</small><b>—</b>`}</div>
+    <div class="entry-main"><div class="entry-t">${TIPOS[r.tipo].nombre} <span class="muted" style="font-weight:400">· ${fCorta(r.datos.fecha)}</span>${r.corrige ? ` <span class="pill accent">Corrección</span>` : ""}</div><div class="entry-s">${esc(sub)}</div></div>
+    <div class="entry-r">${pillPct(e.pct)}${folio}</div></button>`;
+}
+function vistaBitacora() {
+  const cer = S.registros.filter(r => r.estado === "cerrado");
+  const prom = cer.length ? Math.round(cer.reduce((a, r) => a + evalua(r).pct, 0) / cer.length) : 0;
+  const sinF = cer.filter(r => !has(r.folio)).length;
+  const fil = ui.filtro;
+  const lst = S.registros.filter(r => fil === "todos" || (fil === "diaria" ? r.tipo === "diaria" : fil === "funcional" ? r.tipo !== "diaria" : fil === "sinfolio" ? r.estado === "cerrado" && !has(r.folio) : true))
+    .sort((a, b) => (b.consecutivo || 1e9) - (a.consecutivo || 1e9));
+  const fb = (k, t) => `<button data-filtro="${k}" aria-pressed="${fil === k}">${t}</button>`;
+  return `<div class="page-head"><div><div class="eyebrow">Contrato ${esc(S.proyecto.contrato || "—")}</div><h1>Bitácora</h1></div></div>
+    <div class="stats"><div class="card stat"><b class="mono">${cer.length}</b><span>registros cerrados</span></div>
+      <div class="card stat"><b class="mono">${prom} %</b><span>completitud promedio</span></div>
+      <div class="card stat"><b class="mono" style="color:${sinF ? "var(--signal)" : "var(--ok)"}">${sinF}</b><span>sin folio del libro</span></div></div>
+    <div class="filters">${fb("todos", "Todos")}${fb("diaria", "Diarias")}${fb("funcional", "Funcionales")}${fb("sinfolio", "Sin folio")}</div>
+    ${lst.length ? `<div class="card ledger">${lst.map(entradaHtml).join("")}</div>` : `<div class="card empty">No hay registros con este filtro.</div>`}`;
+}
+function vistaProyecto() {
+  const p = S.proyecto;
+  const f = (k, l, ty = "text", ph = "") => `<div class="field"><label for="p-${k}">${l}</label><input class="inp" id="p-${k}" data-pp="${k}" type="${ty}" value="${esc(p[k] || "")}"${ph ? ` placeholder="${esc(ph)}"` : ""}${ty === "number" ? ' inputmode="numeric"' : ""}></div>`;
+  return `<div class="page-head"><div><div class="eyebrow">Datos que usan todas las actas</div><h1>Proyecto</h1></div></div>
+    ${p.demo ? `<div class="card pad" style="border-color:var(--signal)"><b>Está viendo un contrato de ejemplo.</b> Los nombres y valores son ficticios. <div class="row" style="margin-top:8px"><button class="btn small primary" data-limpiar>Empezar mi proyecto</button></div></div>` : ""}
+    <div class="card pad" style="display:grid;gap:14px"><div class="eyebrow">Contrato</div><div class="kv">
+      ${f("contrato", "Número del contrato")}${f("entidad", "Entidad contratante")}${f("valor", "Valor del contrato (COP)", "number")}${f("plazo", "Plazo (días calendario)", "number")}${f("fechaInicio", "Fecha de inicio", "date")}${f("lugar", "Municipio", "text", "Neiva, Huila")}</div>
+      <div class="field"><label for="p-objeto">Objeto</label><textarea class="inp" id="p-objeto" data-pp="objeto">${esc(p.objeto || "")}</textarea></div>
+      ${finOriginal() ? `<div class="calc">Terminación prevista sin suspensiones: <b>${fLarga(finOriginal())}</b></div>` : ""}</div>
+    <div class="card pad" style="display:grid;gap:14px"><div class="eyebrow">Partes</div><div class="kv">
+      ${f("contratista", "Contratista")}${f("residente", "Residente de obra")}${f("interventoria", "Interventoría")}${f("interventor", "Interventor")}</div>
+      <div class="row"><div class="logo-prev">${p.logo ? `<img src="${p.logo}" alt="Logo de la interventoría">` : `<span class="note">Logo</span>`}</div>
+      <label class="btn small file-lbl">Subir logo de la interventoría<input type="file" accept="image/*" data-logo></label></div></div>
+    <div class="card pad" style="display:grid;gap:10px"><div class="eyebrow">Respaldo</div>
+      <p class="note" style="margin:0">Los datos se guardan solo en este dispositivo. Exporte una copia con frecuencia.</p>
+      <div class="row"><button class="btn small" data-exportar>Exportar copia (JSON)</button><label class="btn small file-lbl">Importar copia<input type="file" accept="application/json,.json" data-importar></label></div>
+      <div id="respaldo-msg"></div></div>`;
+}
+function render() {
+  const m = $("#main");
+  document.querySelectorAll(".nav button").forEach(b => b.setAttribute("aria-current", b.dataset.view === ui.view ? "page" : "false"));
+  $("#hdr-sub").textContent = S.proyecto.contrato ? `${S.proyecto.contrato} · ${S.proyecto.contratista || ""}` : "Apoyo a la bitácora de obra";
+  $("#hdr-demo").hidden = !S.proyecto.demo;
+  m.innerHTML = ui.view === "hoy" ? vistaHoy() : ui.view === "actas" ? vistaActas() : ui.view === "bitacora" ? vistaBitacora() : vistaProyecto();
+}
+function refrescarMedidor(r) {
+  const b = $("#meter-box"); if (b) b.innerHTML = meterHtml(r);
+  const e = evalua(r); const okDe = Object.fromEntries(e.res.map(x => [x.c, x.ok]));
+  document.querySelectorAll(".crit span").forEach(s => { s.className = okDe[s.textContent] ? "on" : "off"; });
+  document.querySelectorAll("[data-calc]").forEach(c => c.innerHTML = calcHtml(c.dataset.calc, r));
+}
+
+// ---------- Hoja: texto para la bitácora ----------
+function abrirTexto(r) {
+  const e = evalua(r);
+  const cerrado = r.estado === "cerrado";
+  const html = `<div class="overlay" data-cerrar-ov><div class="modal" role="dialog" aria-modal="true" aria-labelledby="mt">
+    <div class="modal-h"><h2 id="mt">${cerrado ? `Registro N.º ${pad(r.consecutivo)}` : "Vista previa del texto"}</h2>${pillPct(e.pct)}<button class="close" data-cerrar-modal aria-label="Cerrar">${I.x}</button></div>
+    <div class="modal-b">
+      ${cerrado ? "" : `<div class="confirm"><p>Este texto es un borrador. Al cerrar el registro recibe su número consecutivo y ya no se puede editar.</p></div>`}
+      <div class="sheet" id="sheet-txt">${esc(texto(r))}</div>
+      <div class="row"><button class="btn primary" data-copiar="${r.id}">${I.copy}Copiar texto</button><button class="btn" data-pdf="${r.id}">${I.pdf}Descargar PDF con fotos</button></div>
+      ${cerrado ? `<div class="folio-box"><div class="field"><label for="folio-in">Folio del libro de bitácora donde quedó transcrito</label><input class="inp mono" id="folio-in" inputmode="numeric" value="${esc(r.folio || "")}" placeholder="Ej.: 27"></div><button class="btn primary" data-folio="${r.id}">Guardar folio</button></div>` : ""}
+    </div></div></div>`;
+  $("#layer").innerHTML = html;
+  setTimeout(() => { const c = $("[data-cerrar-modal]"); c && c.focus(); }, 30);
+}
+function abrirCierre(r) {
+  const e = evalua(r), falta = e.res.filter(x => !x.ok);
+  $("#layer").innerHTML = `<div class="overlay" data-cerrar-ov><div class="modal" role="dialog" aria-modal="true" aria-labelledby="mc" style="max-width:520px">
+    <div class="modal-h"><h2 id="mc">Cerrar el registro</h2><button class="close" data-cerrar-modal aria-label="Cancelar">${I.x}</button></div>
+    <div class="modal-b"><p style="margin:0">Recibirá el número <b class="mono">${pad(proximoConsecutivo())}</b> y quedará bloqueado. Una corrección posterior se hace con un registro nuevo, como en el libro.</p>
+    ${falta.length ? `<div class="confirm"><p><b>Faltan ${falta.length} de ${e.total} criterios:</b> ${falta.map(x => esc(x.t)).join(", ")}.</p><p>Si el dato no aplica a esta jornada, escríbalo así («Ninguno», «Sin novedad») para que quede constancia.</p></div>` : `<div class="pill ok">Completa: ${e.total} de ${e.total} criterios</div>`}
+    <div class="row" style="justify-content:flex-end"><button class="btn" data-cerrar-modal>Seguir editando</button><button class="btn primary" data-confirmar-cierre="${r.id}">${falta.length ? "Cerrar de todos modos" : "Cerrar registro"}</button></div></div></div></div>`;
+}
+function cerrarModal() { $("#layer").innerHTML = ""; }
+
+// ---------- PDF ----------
+async function generarPDF(r) {
+  if (!window.jspdf) { toast("No se pudo cargar el generador de PDF. Revise la conexión y vuelva a abrir la app."); return; }
+  const { jsPDF } = window.jspdf; const doc = new jsPDF({ unit: "mm", format: "letter" });
+  const p = S.proyecto, W = 215.9, M = 18; let y = 16;
+  const pie = () => { const n = doc.getNumberOfPages(); for (let i = 1; i <= n; i++) { doc.setPage(i); doc.setFontSize(8); doc.setTextColor(110);
+    doc.text(`Generado con BitaObra el ${fCorta(hoyISO())} · Registro N.º ${r.consecutivo ? pad(r.consecutivo) : "borrador"} · Folio del libro: ${r.folio || "pendiente"}`, M, 270); doc.text(`Página ${i} de ${n}`, W - M, 270, { align: "right" }); } };
+  if (p.logo) { try { doc.addImage(p.logo, M, y - 4, 22, 22, undefined, "FAST"); } catch (e) {} }
+  const x0 = p.logo ? M + 26 : M;
+  doc.setFont("helvetica", "bold"); doc.setFontSize(13); doc.setTextColor(20); doc.text(p.interventoria || "Interventoría", x0, y + 2);
+  doc.setFont("helvetica", "normal"); doc.setFontSize(9.5); doc.setTextColor(80);
+  doc.text(`Contrato ${p.contrato || "—"} · ${p.contratista || ""}`, x0, y + 8);
+  doc.text(doc.splitTextToSize(p.objeto || "", W - x0 - M), x0, y + 13);
+  y += 24; doc.setDrawColor(29, 79, 145); doc.setLineWidth(.6); doc.line(M, y, W - M, y); y += 8;
+  doc.setFont("helvetica", "bold"); doc.setFontSize(14); doc.setTextColor(29, 79, 145);
+  doc.text(`${TIPOS[r.tipo].nombre} · ${r.consecutivo ? "Registro N.º " + pad(r.consecutivo) : "Borrador"}`, M, y); y += 6;
+  doc.setFont("helvetica", "normal"); doc.setFontSize(9.5); doc.setTextColor(90); doc.text(`Completitud: ${evalua(r).pct} % de los contenidos mínimos`, M, y); y += 8;
+  doc.setFont("times", "normal"); doc.setFontSize(11); doc.setTextColor(20);
+  const lineas = doc.splitTextToSize(texto(r).split("\n").slice(2).join("\n"), W - 2 * M);
+  for (const l of lineas) { if (y > 258) { doc.addPage(); y = 20; } doc.text(l, M, y); y += 5.4; }
+  const fotos = r.fotos || [];
+  if (fotos.length) {
+    y += 6; if (y > 220) { doc.addPage(); y = 20; }
+    doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.text("Registro fotográfico", M, y); y += 5;
+    const cw = (W - 2 * M - 8) / 2, ch = cw * .75;
+    for (let i = 0; i < fotos.length; i++) {
+      const col = i % 2; if (col === 0 && y + ch + 10 > 262) { doc.addPage(); y = 20; }
+      const x = M + col * (cw + 8);
+      try { doc.addImage(fotos[i].src, "JPEG", x, y, cw, ch, undefined, "FAST"); } catch (e) {}
+      doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(80);
+      doc.text(`Foto ${i + 1} · ${(fotos[i].fecha || "").replace("T", " ").slice(0, 16)}${fotos[i].lat ? ` · ${fotos[i].lat.toFixed(5)}, ${fotos[i].lon.toFixed(5)}` : ""}`, x, y + ch + 4);
+      doc.setTextColor(20); if (col === 1 || i === fotos.length - 1) y += ch + 10;
+    }
+  }
+  pie();
+  const nombre = `${r.tipo}-${p.contrato || "contrato"}-${r.consecutivo ? pad(r.consecutivo) : "borrador"}.pdf`;
+  await ofrecerArchivo(nombre, doc.output("blob"), "PDF");
+}
+
+// ---------- Descargas ----------
+// En la app instalada se descarga directo; dentro del visor web se pide permiso al visor.
+let descargas;
+async function ofrecerArchivo(nombre, blob, que) {
+  if (enIframe && window.claude && window.claude.use) {
+    if (descargas === undefined) descargas = await window.claude.use("downloads");
+    if (descargas) {
+      try { await descargas.save({ filename: nombre, data: blob }); toast(`${que} guardado`); }
+      catch (e) { toast(e && e.code === "declined" ? "Descarga cancelada" : "No se pudo guardar el archivo en esta vista."); }
+      return;
+    }
+  }
+  try { const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = nombre; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); toast(`${que} generado`); }
+  catch (e) { toast("El navegador bloqueó la descarga."); }
+}
+
+// ---------- Fotos ----------
+function leerFoto(file) {
+  return new Promise(res => {
+    const rd = new FileReader();
+    rd.onload = () => { const img = new Image(); img.onload = () => {
+      const k = Math.min(1, 1000 / Math.max(img.width, img.height)); const c = document.createElement("canvas");
+      c.width = Math.round(img.width * k); c.height = Math.round(img.height * k); c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      const f = new Date(file.lastModified || Date.now());
+      res({ src: c.toDataURL("image/jpeg", .72), fecha: `${isoDe(f)}T${String(f.getHours()).padStart(2, "0")}:${String(f.getMinutes()).padStart(2, "0")}`, nombre: file.name });
+    }; img.onerror = () => res(null); img.src = rd.result; };
+    rd.onerror = () => res(null); rd.readAsDataURL(file);
+  });
+}
+function ubicacion() {
+  return new Promise(res => { try { navigator.geolocation.getCurrentPosition(p => res({ lat: p.coords.latitude, lon: p.coords.longitude }), () => res(null), { timeout: 5000, maximumAge: 60000 }); } catch (e) { res(null); } });
+}
+
+// ---------- Eventos ----------
+function regActual() { const ed = document.querySelector("[data-editor]"); return ed ? S.registros.find(r => r.id === ed.dataset.editor) : null; }
+function setPath(obj, path, val) { const ks = path.split("."); let o = obj; for (let i = 0; i < ks.length - 1; i++) { const k = ks[i]; if (o[k] === undefined || typeof o[k] !== "object") o[k] = {}; o = o[k]; } o[ks[ks.length - 1]] = val; }
+
+document.addEventListener("input", e => {
+  const t = e.target;
+  if (t.dataset.p) { const r = regActual(); if (!r || r.estado === "cerrado") return; setPath(r.datos, t.dataset.p, t.value); guardar(); refrescarMedidor(r); }
+  if (t.dataset.pp) { S.proyecto[t.dataset.pp] = t.value; guardar(); }
+});
+document.addEventListener("change", async e => {
+  const t = e.target;
+  if (t.dataset.chk) { const r = regActual(); if (!r) return; if (t.dataset.obj) { const v = r.datos[t.dataset.chk] || {}; v.ok = t.checked; r.datos[t.dataset.chk] = v; } else r.datos[t.dataset.chk] = t.checked; guardar(); refrescarMedidor(r); }
+  if (t.dataset.p && t.tagName === "SELECT") { const r = regActual(); if (r) refrescarMedidor(r); }
+  if (t.dataset.pp) render();
+  if (t.dataset.foto !== undefined && t.files && t.files.length) {
+    const r = regActual(); if (!r) return; const files = [...t.files]; t.value = "";
+    const pos = await ubicacion();
+    for (const f of files) { const ph = await leerFoto(f); if (ph) { if (pos) Object.assign(ph, pos); r.fotos.push(ph); } }
+    guardar(); render(); toast(`${files.length} foto${files.length > 1 ? "s" : ""} agregada${files.length > 1 ? "s" : ""}`);
+  }
+  if (t.dataset.logo !== undefined && t.files && t.files[0]) { const ph = await leerFoto(t.files[0]); if (ph) { S.proyecto.logo = ph.src; guardar(); render(); } }
+  if (t.dataset.importar !== undefined && t.files && t.files[0]) {
+    const msg = $("#respaldo-msg");
+    try { const d = JSON.parse(await t.files[0].text()); if (!d.proyecto || !Array.isArray(d.registros)) throw 0; S = d; guardar(); render(); toast("Copia importada"); }
+    catch (err) { if (msg) msg.innerHTML = `<p class="note" style="color:var(--bad)">El archivo no es una copia de BitaObra. Elija el archivo .json que exportó la aplicación.</p>`; }
+  }
+});
+document.addEventListener("click", async e => {
+  const b = e.target.closest("button, [data-cerrar-ov]"); if (!b) return;
+  const d = b.dataset;
+  if (d.cerrarOv !== undefined && e.target === b) return cerrarModal();
+  if (b.tagName !== "BUTTON") return;
+  if (d.view) { ui.view = d.view; ui.abierto = null; render(); window.scrollTo(0, 0); return; }
+  if (d.viewGo) { ui.view = d.viewGo; ui.filtro = "sinfolio"; render(); return; }
+  if (d.nueva) { const r = nuevoRegistro(d.nueva); ui.abierto = r.id; ui.view = d.nueva === "diaria" ? "hoy" : "actas"; render(); window.scrollTo(0, 0); return; }
+  if (d.abrir) { const r = S.registros.find(x => x.id === d.abrir); if (!r) return;
+    if (r.estado === "cerrado") return abrirTexto(r);
+    ui.abierto = r.id; ui.view = r.tipo === "diaria" && r.datos.fecha === hoyISO() ? "hoy" : "actas";
+    render(); window.scrollTo(0, 0); return; }
+  if (d.volver !== undefined) { ui.abierto = null; render(); return; }
+  if (d.addrow) { const r = regActual(); (r.datos[d.addrow] = r.datos[d.addrow] || []).push({}); guardar(); render(); return; }
+  if (d.del) { const r = regActual(); const [k, i] = d.del.split("."); r.datos[k].splice(+i, 1); guardar(); render(); return; }
+  if (d.delfoto) { const r = regActual(); r.fotos.splice(+d.delfoto, 1); guardar(); render(); return; }
+  if (d.goto) { const el = document.getElementById("sec-" + d.goto) || [...document.querySelectorAll(".sec")].find(s => s.querySelector(".crit")?.textContent.includes(d.goto));
+    if (el) { el.scrollIntoView({ behavior: "smooth", block: "start" }); const f = el.querySelector("input:not([type=file]), select, textarea"); f && setTimeout(() => f.focus({ preventScroll: true }), 350); } return; }
+  if (d.texto) { const r = S.registros.find(x => x.id === d.texto); return abrirTexto(r); }
+  if (d.cerrar) { const r = S.registros.find(x => x.id === d.cerrar); return abrirCierre(r); }
+  if (d.confirmarCierre) { const r = S.registros.find(x => x.id === d.confirmarCierre); r.estado = "cerrado"; r.consecutivo = proximoConsecutivo(); r.cerrado = new Date().toISOString();
+    if (r.tipo === "inicio" && has(r.datos.fechaInicio)) S.proyecto.fechaInicio = r.datos.fechaInicio;
+    guardar(); cerrarModal(); render(); abrirTexto(r); toast(`Registro N.º ${pad(r.consecutivo)} cerrado`); return; }
+  if (d.cerrarModal !== undefined) return cerrarModal();
+  if (d.borrar) { const r = S.registros.find(x => x.id === d.borrar); if (!r) return;
+    if (b.dataset.armado !== "1") { b.dataset.armado = "1"; b.textContent = "Toque otra vez para descartar"; setTimeout(() => { if (b.isConnected) { b.dataset.armado = ""; b.textContent = "Descartar borrador"; } }, 3000); return; }
+    S.registros = S.registros.filter(x => x.id !== r.id); ui.abierto = null; guardar(); render(); toast("Borrador descartado"); return; }
+  if (d.corregir) { const o = S.registros.find(x => x.id === d.corregir); const r = nuevoRegistro(o.tipo, JSON.parse(JSON.stringify(o.datos))); r.datos.fecha = o.datos.fecha; r.corrige = o.id; r.fotos = (o.fotos || []).slice();
+    ui.abierto = r.id; ui.view = "actas"; guardar(); render(); window.scrollTo(0, 0); toast("Corrección creada como borrador"); return; }
+  if (d.copiar) { const r = S.registros.find(x => x.id === d.copiar); const t = texto(r);
+    try { await navigator.clipboard.writeText(t); toast("Texto copiado: péguelo o transcríbalo en el libro"); }
+    catch (err) { const s = $("#sheet-txt"); const rg = document.createRange(); rg.selectNodeContents(s); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(rg); toast("Texto seleccionado: cópielo con el menú del teléfono"); } return; }
+  if (d.pdf) { const r = S.registros.find(x => x.id === d.pdf); return generarPDF(r); }
+  if (d.folio) { const r = S.registros.find(x => x.id === d.folio); r.folio = $("#folio-in").value.trim(); guardar(); render(); cerrarModal(); toast(r.folio ? `Folio ${r.folio} registrado` : "Folio borrado"); return; }
+  if (d.filtro) { ui.filtro = d.filtro; render(); return; }
+  if (d.exportar !== undefined) {
+    await ofrecerArchivo(`bitaobra-${S.proyecto.contrato || "proyecto"}-${hoyISO()}.json`, new Blob([JSON.stringify(S)], { type: "application/json" }), "Copia");
+    return; }
+  if (d.limpiar !== undefined) {
+    if (b.dataset.armado !== "1") { b.dataset.armado = "1"; b.textContent = "Toque otra vez: se borra el ejemplo"; return; }
+    S = { proyecto: { demo: false, lugar: "", plazo: "", valor: "" }, registros: [] }; ui.abierto = null; guardar(); render(); toast("Proyecto en blanco. Llene los datos del contrato."); return; }
+});
+document.addEventListener("keydown", e => { if (e.key === "Escape" && $("#layer").innerHTML) cerrarModal(); });
+$("#btn-theme").addEventListener("click", () => {
+  const cur = document.documentElement.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  const nx = cur === "dark" ? "light" : "dark"; document.documentElement.dataset.theme = nx; try { localStorage.setItem("bitaobra-tema", nx); } catch (e) {}
+});
+
+// ---------- Arranque ----------
+(async function () {
+  try { const t = localStorage.getItem("bitaobra-tema"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  await Store.open();
+  S = await Store.get("estado");
+  if (!S || !S.proyecto) ejemplo();
+  render();
+  if ("serviceWorker" in navigator && !enIframe && location.protocol.startsWith("http")) { try { navigator.serviceWorker.register("sw.js"); } catch (e) {} }
+})();
+</script>
+
+</body>
+</html>
