@@ -228,6 +228,9 @@ textarea.inp { min-height: 76px; resize: vertical; line-height: 1.45; }
 .signer-ico { width: 34px; height: 34px; border-radius: 9px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; flex: none; }
 .signer-ico.ok { background: var(--ok-soft); color: var(--ok); }
 .signer-ico svg { width: 18px; height: 18px; }
+.rub { height: 40px; max-width: 110px; object-fit: contain; background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 2px 4px; flex: none; }
+.signer { flex-wrap: wrap; }
+.rub-row { flex: 1 0 100%; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding-left: 46px; }
 .firmas { display: grid; gap: 8px; }
 .nuevo-firm > summary { list-style: none; width: max-content; }
 .nuevo-firm > summary::-webkit-details-marker { display: none; }
@@ -443,7 +446,7 @@ const CLASES = {
     secciones: [
       { t: "Jornada", c: ["D1", "D2"], campos: [{ k: "fecha", l: "Fecha de la jornada", ty: "date" }, { k: "horaIni", l: "Hora de inicio", ty: "time" }, { k: "horaFin", l: "Hora de fin", ty: "time" }] },
       { t: "Clima", c: ["D3"], campos: [{ k: "climaAm", l: "Mañana", ty: "select", op: CLIMA }, { k: "climaPm", l: "Tarde", ty: "select", op: CLIMA }, { k: "climaAfecta", l: "¿Afectó la obra?", ph: "No / Sí: se detuvo la fundida de 15:00 a 16:30", wide: true }] },
-      { t: "Personal", c: ["D4"], campos: [{ k: "personal", ty: "list", add: "Agregar categoría", f: [{ k: "cat", l: "Categoría", ty: "select", op: ["Ingeniero residente", "Maestro de obra", "Oficial", "Ayudante", "Operador", "Inspector SST", "Otro"] }, { k: "n", l: "Cantidad", ty: "number" }] }] },
+      { t: "Personal", c: ["D4"], campos: [{ k: "personal", ty: "list", add: "Agregar categoría", f: [{ k: "cat", l: "Categoría", ty: "select", op: ["Director de obra", "Ingeniero residente", "Especialista en pavimentos", "Especialista en estructuras", "Especialista en geotecnia", "Especialista en hidráulica", "Especialista ambiental", "Especialista en tránsito", "Topógrafo", "Cadenero", "Laboratorista", "Inspector SST", "Maestro de obra", "Oficial", "Ayudante", "Operador", "Conductor", "Otro"] }, { k: "n", l: "Cantidad", ty: "number" }] }] },
       { t: "Equipos", c: ["D5"], campos: [{ k: "equipos", ty: "list", add: "Agregar equipo", f: [{ k: "eq", l: "Equipo" }, { k: "est", l: "Estado", ty: "select", op: ["Operativo", "Varado", "En mantenimiento"] }] }] },
       { t: "Actividades ejecutadas", c: ["D6", "D7"], campos: [{ k: "actividades", ty: "list", add: "Agregar actividad", f: [{ k: "desc", l: "Actividad" }, { k: "loc", l: "Localización", ph: "Eje B entre 2 y 4" }, { k: "cant", l: "Cantidad", ty: "number" }, { k: "und", l: "Unidad", ty: "select", op: UNIDADES }] }] },
       { t: "Materiales y ensayos", c: ["D8"], campos: [{ k: "materiales", l: "Materiales recibidos o ensayos realizados", ty: "textarea", ph: "Escriba «Ninguno» si no hubo", wide: true }] },
@@ -587,7 +590,7 @@ async function verificar(estado) {
 }
 
 // ---------- Texto de la nota ----------
-const PLURAL = { "Ingeniero residente": "ingenieros residentes", "Maestro de obra": "maestros de obra", "Oficial": "oficiales", "Ayudante": "ayudantes", "Operador": "operadores", "Inspector SST": "inspectores SST", "Otro": "otros" };
+const PLURAL = { "Director de obra": "directores de obra", "Especialista en pavimentos": "especialistas en pavimentos", "Especialista en estructuras": "especialistas en estructuras", "Especialista en geotecnia": "especialistas en geotecnia", "Especialista en hidráulica": "especialistas en hidráulica", "Especialista ambiental": "especialistas ambientales", "Especialista en tránsito": "especialistas en tránsito", "Topógrafo": "topógrafos", "Cadenero": "cadeneros", "Laboratorista": "laboratoristas", "Conductor": "conductores", "Ingeniero residente": "ingenieros residentes", "Maestro de obra": "maestros de obra", "Oficial": "oficiales", "Ayudante": "ayudantes", "Operador": "operadores", "Inspector SST": "inspectores SST", "Otro": "otros" };
 function categoria(c, n) { if (!has(c)) return "sin categoría"; return n === 1 ? c.charAt(0).toLowerCase() + c.slice(1) : (PLURAL[c] || c.toLowerCase()); }
 function lista(arr, fn) { return (arr || []).map((x, i) => fn(x, i)).join("\n"); }
 const nomF = f => f ? `${f.nombre}, ${f.cargo} (${f.parte.toLowerCase()})${has(f.mat) ? `, M.P. ${f.mat}` : ""}` : "firmante no registrado";
@@ -599,7 +602,7 @@ function texto(r) {
   if (r.clase === "apertura") {
     const c = d.contrato;
     t += `En la reunión técnica inicial se abre el diario de obra (bitácora) en medio electrónico, conforme al numeral 8.4, ítem 8, del Manual de Interventoría Obra Pública del INVIAS (MEPI-MN1, 2022). Contrato ${c.contrato || "—"}, suscrito con ${c.entidad || "—"}, cuyo objeto es ${c.objeto || "—"}. Contratista: ${c.contratista || "—"}. Interventoría: ${c.interventoria || "—"}. Valor: ${num(c.valor) ? fCOP(num(c.valor)) : "—"}. Plazo: ${c.plazo || "—"} días calendario a partir del ${fLarga(c.fechaInicio)}. Lugar: ${c.lugar || "—"}.\n`;
-    t += `Firmantes autorizados para asentar y firmar notas:\n${lista(d.firmantes, (f, i) => `  ${i + 1}. ${f.nombre}, ${f.cargo} (${f.parte.toLowerCase()}), C.C. ${f.doc || "—"}${has(f.mat) ? `, matrícula profesional ${f.mat}` : ""}. Huella de su firma: ${f.huella}.`)}\n`;
+    t += `Firmantes autorizados para asentar y firmar notas:\n${lista(d.firmantes, (f, i) => `  ${i + 1}. ${f.nombre}, ${f.cargo} (${f.parte.toLowerCase()}), C.C. ${f.doc || "—"}${has(f.mat) ? `, matrícula profesional ${f.mat}` : ""}. Huella de su firma: ${f.huella}.${f.rubrica ? " Registró su firma escaneada." : ""}`)}\n`;
     t += `Horario para asentar notas: ${d.horaIni} a ${d.horaFin}.\n`;
     t += `Plazo para firmar de enterado: ${d.diasEnterado} días calendario. Vencido el plazo sin observación, la nota se tiene por aceptada.\n`;
     t += `Acuerdo de firma electrónica: las partes acuerdan llevar esta bitácora en medio electrónico y firmar sus notas con firma electrónica, conforme al artículo 7 de la Ley 527 de 1999 y a los artículos 2.2.2.47.1 a 2.2.2.47.8 del Decreto 1074 de 2015. Cada firmante declara que la clave registrada con la huella indicada es de su uso exclusivo y que mantendrá en reserva su PIN. Las notas firmadas no se modifican: un error se corrige con una nota que anula la anterior y la reemplaza. La bitácora permanece en el dispositivo de la oficina de campo de la interventoría, y cada parte recibe la copia exportada para su verificación y para el expediente contractual.\n`;
@@ -644,7 +647,7 @@ async function ejemplo() {
   S = { proyecto: p, notas: [] }; CLAVES = {};
   const priv = {};
   for (const [nombre, doc, cargo, parte, mat] of [["Ing. Carlos Rojas", "7.712.345", "Director de interventoría", "Interventoría", "41202-123456 HLA"], ["Ing. Laura Medina", "36.180.222", "Residente de obra", "Contratista", "41202-234567 HLA"], ["Arq. Diana Perdomo", "55.160.789", "Supervisora del contrato", "Entidad contratante", "A41012-5566"]]) {
-    const k = await crearClave(PIN_EJEMPLO); const f = { id: uid(), nombre, doc, cargo, parte, mat, pubJwk: k.pubJwk, huella: k.huella };
+    const k = await crearClave(PIN_EJEMPLO); const f = { id: uid(), nombre, doc, cargo, parte, mat, pubJwk: k.pubJwk, huella: k.huella, rubrica: rubricaEjemplo(nombre) };
     p.firmantes.push(f); CLAVES[f.id] = k.guardada; priv[f.id] = k.privada;
   }
   const [CR_, LM, DP] = p.firmantes;
@@ -670,7 +673,7 @@ async function ejemplo() {
   // Borrador de hoy, a medio llenar para mostrar el medidor
   S.notas.push({ id: uid(), clase: "diaria", estado: "borrador", n: null, fotos: [], creado: new Date().toISOString(),
     datos: { fecha: h, horaIni: "07:00", horaFin: "17:00", climaAm: "Soleado", climaPm: "", climaAfecta: "",
-      personal: [{ cat: "Ingeniero residente", n: "1" }, { cat: "Oficial", n: "4" }, { cat: "Ayudante", n: "7" }], equipos: [{ eq: "Mezcladora de 1 bulto", est: "Operativo" }, { eq: "Vibrador de concreto", est: "" }],
+      personal: [{ cat: "Ingeniero residente", n: "1" }, { cat: "Especialista en estructuras", n: "1" }, { cat: "Oficial", n: "4" }, { cat: "Ayudante", n: "7" }], equipos: [{ eq: "Mezcladora de 1 bulto", est: "Operativo" }, { eq: "Vibrador de concreto", est: "" }],
       actividades: [act("Desencofrado de zapatas", "Eje B, entre 1 y 4", 8, "und"), { desc: "Armado de columnas", loc: "", cant: "", und: "" }], materiales: "", ordenes: "Verificar recubrimiento de 4 cm en columnas antes de cerrar formaleta.", sst: "" } });
   await Store.set("claves", CLAVES);
 }
@@ -846,7 +849,7 @@ function verifHtml(v, simulado) {
 function vistaProyecto() {
   const p = S.proyecto, ap = apertura();
   const f = (k, l, ty = "text", ph = "") => `<div class="field"><label for="p-${k}">${l}</label><input class="inp" id="p-${k}" data-pp="${k}" type="${ty}" value="${esc(p[k] || "")}"${ph ? ` placeholder="${esc(ph)}"` : ""}${ty === "number" ? ' inputmode="numeric"' : ""}></div>`;
-  const firm = (p.firmantes || []).map(x => `<div class="signer"><div class="signer-ico">${I.key}</div><div style="min-width:0"><b>${esc(x.nombre)}</b> <span class="muted">· ${esc(x.cargo)} · ${esc(x.parte)}</span><div class="mono note">C.C. ${esc(x.doc || "—")}${has(x.mat) ? ` · M.P. ${esc(x.mat)}` : ""} · Huella ${esc(x.huella)}${CLAVES[x.id] ? "" : " · su clave no está en este dispositivo"}</div></div>${ap ? "" : `<button class="del" data-delfirm="${x.id}" aria-label="Quitar firmante">${I.x}</button>`}</div>`).join("");
+  const firm = (p.firmantes || []).map(x => `<div class="signer"><div class="signer-ico">${I.key}</div><div style="min-width:0"><b>${esc(x.nombre)}</b> <span class="muted">· ${esc(x.cargo)} · ${esc(x.parte)}</span><div class="mono note">C.C. ${esc(x.doc || "—")}${has(x.mat) ? ` · M.P. ${esc(x.mat)}` : ""} · Huella ${esc(x.huella)}${CLAVES[x.id] ? "" : " · su clave no está en este dispositivo"}</div></div>${ap ? "" : `<button class="del" data-delfirm="${x.id}" aria-label="Quitar firmante">${I.x}</button>`}${x.rubrica || !ap ? `<div class="rub-row">${x.rubrica ? `<img class="rub" src="${x.rubrica}" alt="Firma escaneada de ${esc(x.nombre)}">` : `<span class="note">Sin firma escaneada</span>`}${ap ? "" : `<label class="btn small file-lbl">${x.rubrica ? "Cambiar firma escaneada" : "Subir firma escaneada"}<input type="file" accept="image/*" data-rubrica="${x.id}"></label>`}</div>` : ""}</div>`).join("");
   const cfg = p.cfg || {};
   return `<div class="page-head"><div><div class="eyebrow">Contrato, firmantes y apertura</div><h1>Proyecto</h1></div></div>
     ${p.demo ? `<div class="card pad" style="border-color:var(--signal)"><b>Está viendo un contrato de ejemplo.</b> Los nombres son ficticios. El PIN de los tres firmantes es <span class="mono">${PIN_EJEMPLO}</span>. <div class="row" style="margin-top:8px"><button class="btn small primary" data-limpiar>Empezar mi proyecto</button></div></div>` : ""}
@@ -856,12 +859,12 @@ function vistaProyecto() {
       <div class="field"><label for="p-objeto">Objeto</label><textarea class="inp" id="p-objeto" data-pp="objeto">${esc(p.objeto || "")}</textarea></div>
       <div class="row"><div class="logo-prev">${p.logo ? `<img src="${p.logo}" alt="Logo de la interventoría">` : `<span class="note">Logo</span>`}</div><label class="btn small file-lbl">Subir logo de la interventoría<input type="file" accept="image/*" data-logo></label></div></div>
     <div class="card pad" style="display:grid;gap:12px"><div class="eyebrow">Firmantes</div>
-      <p class="note" style="margin:0">Cada firmante crea su firma en este teléfono con un PIN que solo él conoce. La huella de su clave queda en la nota de apertura y permite verificar todas sus firmas.</p>
+      <p class="note" style="margin:0">Cada firmante crea su firma en este teléfono con un PIN que solo él conoce. La huella de su clave queda en la nota de apertura y permite verificar todas sus firmas. Después del PIN puede subir su firma escaneada: aparece en el PDF sobre su nombre. La imagen es la firma que se ve; la que se verifica es la clave.</p>
       ${firm || `<div class="note">Aún no hay firmantes.</div>`}
       ${ap ? `<p class="note" style="margin:0">La bitácora ya está abierta: la lista de firmantes quedó fijada en la nota de apertura.</p>` : `<details class="nuevo-firm"${(p.firmantes || []).length < 2 ? " open" : ""}><summary class="btn small">${I.plus}Agregar firmante</summary>
         <div class="kv" style="margin-top:10px"><div class="field"><label for="nf-nombre">Nombre</label><input class="inp" id="nf-nombre" placeholder="Ing. Laura Medina"></div><div class="field"><label for="nf-doc">Cédula</label><input class="inp" id="nf-doc" inputmode="numeric"></div>
         <div class="field"><label for="nf-mat">Matrícula profesional</label><input class="inp" id="nf-mat"></div><div class="field"><label for="nf-cargo">Cargo</label><input class="inp" id="nf-cargo" placeholder="Residente de obra"></div><div class="field"><label for="nf-parte">Parte</label><select class="inp" id="nf-parte">${PARTES.map(x => `<option>${x}</option>`).join("")}</select></div>
-        <div class="field"><label for="nf-pin">PIN de firma (6 dígitos o más)</label><input class="inp mono" id="nf-pin" type="password" inputmode="numeric" autocomplete="new-password"></div><div class="field"><label for="nf-pin2">Repita el PIN</label><input class="inp mono" id="nf-pin2" type="password" inputmode="numeric" autocomplete="new-password"></div></div>
+        <div class="field"><label for="nf-pin">PIN de firma (6 dígitos o más)</label><input class="inp mono" id="nf-pin" type="password" inputmode="numeric" autocomplete="new-password"></div><div class="field"><label for="nf-pin2">Repita el PIN</label><input class="inp mono" id="nf-pin2" type="password" inputmode="numeric" autocomplete="new-password"></div><div class="field"><label for="nf-rub">Firma escaneada (foto o imagen, opcional)</label><input class="inp" id="nf-rub" type="file" accept="image/*"></div></div>
         <div id="nf-msg"></div><div class="row" style="margin-top:10px"><button class="btn primary" data-crear-firm>${I.key}Crear firma</button></div></details>`}</div>
     <div class="card pad" style="display:grid;gap:12px"><div class="eyebrow">Apertura de la bitácora</div>
       ${ap ? `<p style="margin:0">Abierta con la nota N.º ${pad(ap.n)} en la reunión técnica inicial del ${fLarga(ap.datos.fecha)}. Horario para asentar notas: ${esc(ap.datos.horaIni)} a ${esc(ap.datos.horaFin)}. Plazo de enterado: ${esc(ap.datos.diasEnterado)} días.</p><div><button class="btn small" data-abrir="${ap.id}">Ver la nota de apertura</button></div>`
@@ -891,7 +894,7 @@ function refrescarMedidor(r) {
 function firmasHtml(r) {
   if (r.estado !== "firmada") return "";
   const e = estadoEnterado(r);
-  const filas = r.sello.firmas.map(s => { const f = firmante(s.f); return `<div class="signer"><div class="signer-ico ok">${I.pen}</div><div style="min-width:0"><b>${s.rol === "autor" ? "Emite" : "Enterado"}: ${esc(f ? f.nombre : "—")}</b> <span class="muted">· ${esc(f ? `${f.cargo}, ${f.parte.toLowerCase()}` : "")}</span><div class="mono note">${fHora(s.t)} · Huella ${esc(f ? f.huella : "—")}</div></div></div>`; }).join("");
+  const filas = r.sello.firmas.map(s => { const f = firmante(s.f); return `<div class="signer"><div class="signer-ico ok">${I.pen}</div><div style="min-width:0"><b>${s.rol === "autor" ? "Emite" : "Enterado"}: ${esc(f ? f.nombre : "—")}</b> <span class="muted">· ${esc(f ? `${f.cargo}, ${f.parte.toLowerCase()}` : "")}</span><div class="mono note">${fHora(s.t)} · Huella ${esc(f ? f.huella : "—")}</div></div>${f && f.rubrica ? `<img class="rub" src="${f.rubrica}" alt="Firma escaneada de ${esc(f.nombre)}">` : ""}</div>`; }).join("");
   const pend = e.k === "pend" ? `<div class="confirm"><p>${e.faltan ? `Falta la firma de ${esc(e.faltan.map(f => f.nombre).join(" y "))}.` : `Falta el enterado de la otra parte. Plazo: ${fLarga(e.vence)}; vencido, la nota se tiene por aceptada.`}</p></div>` : e.k === "plazo" ? `<div class="note">Sin firma de enterado: aceptada por vencimiento del plazo el ${fCorta(e.vence)}.</div>` : "";
   return `<div class="firmas"><div class="eyebrow">Firmas electrónicas</div>${filas}${pend}<div class="mono note" style="word-break:break-all">Hash: ${r.sello.hash}<br>Anterior: ${r.sello.hashPrev}</div></div>`;
 }
@@ -995,7 +998,23 @@ async function generarPDF(notas, nombre) {
       y += 4; salto(30);
       doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(20); doc.text("Firmas electrónicas", M, y); y += 5;
       doc.setFont("helvetica", "normal"); doc.setFontSize(9);
-      for (const l of doc.splitTextToSize(firmasTexto(r).split("\n").slice(2).map(s => s.trim()).join("\n"), W - 2 * M)) { salto(5); doc.text(l, M, y); y += 4.4; }
+      // Cada firma: la imagen escaneada (si la hay) sobre una línea, y debajo el nombre y los datos de la firma electrónica
+      const cw = (W - 2 * M - 8) / 2;
+      r.sello.firmas.forEach((sg, i) => {
+        const fx = firmante(sg.f), col = i % 2, x = M + col * (cw + 8);
+        if (col === 0) salto(34);
+        if (fx && fx.rubrica) { try { doc.addImage(fx.rubrica, "PNG", x, y, 42, 14, undefined, "FAST"); } catch (e) {} }
+        doc.setDrawColor(120); doc.setLineWidth(.2); doc.line(x, y + 15, x + cw - 6, y + 15);
+        doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(20);
+        doc.text(`${sg.rol === "autor" ? "Emite" : "Enterado"}: ${fx ? fx.nombre : "—"}`, x, y + 19);
+        doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(80);
+        const ls = doc.splitTextToSize(`${fx ? `${fx.cargo}, ${fx.parte.toLowerCase()}` : ""} · ${fHora(sg.t)}`, cw - 6).slice(0, 2);
+        doc.text(ls, x, y + 23); doc.text(`Huella ${fx ? fx.huella : "—"}`, x, y + 23 + 3.6 * ls.length);
+        if (col === 1 || i === r.sello.firmas.length - 1) y += 33;
+      });
+      doc.setFontSize(9); doc.setTextColor(20);
+      const resto = firmasTexto(r).split("\n").slice(2).filter(l => !/^\s+(Emite|Enterado):/.test(l)).map(l => l.trim()).join("\n");
+      for (const l of doc.splitTextToSize(resto, W - 2 * M)) { salto(5); doc.text(l, M, y); y += 4.4; }
     }
   });
   const n = doc.getNumberOfPages();
@@ -1018,6 +1037,31 @@ async function ofrecerArchivo(nombre, blob, que) {
   }
   try { const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = nombre; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); toast(`${que} generado`); }
   catch (e) { toast("El navegador bloqueó la descarga."); }
+}
+
+// ---------- Firma escaneada ----------
+// Reduce la imagen y vuelve transparente el fondo claro del papel, para que la firma se vea limpia en el PDF.
+function leerRubrica(file) {
+  return new Promise(res => {
+    const rd = new FileReader();
+    rd.onload = () => { const img = new Image(); img.onload = () => {
+      const k = Math.min(1, 480 / img.width, 200 / img.height); const c = document.createElement("canvas");
+      c.width = Math.max(1, Math.round(img.width * k)); c.height = Math.max(1, Math.round(img.height * k));
+      const g = c.getContext("2d"); g.drawImage(img, 0, 0, c.width, c.height);
+      const px = g.getImageData(0, 0, c.width, c.height), a = px.data;
+      for (let i = 0; i < a.length; i += 4) { const l = (a[i] + a[i + 1] + a[i + 2]) / 3; if (l > 200) a[i + 3] = 0; }
+      g.putImageData(px, 0, 0); res(c.toDataURL("image/png"));
+    }; img.onerror = () => res(null); img.src = rd.result; };
+    rd.onerror = () => res(null); rd.readAsDataURL(file);
+  });
+}
+// Rúbrica dibujada para los firmantes del ejemplo
+function rubricaEjemplo(nombre) {
+  const c = document.createElement("canvas"); c.width = 420; c.height = 140; const g = c.getContext("2d");
+  g.fillStyle = "#1d2f6f"; g.font = "italic 52px 'Segoe Script', 'Brush Script MT', cursive"; g.textBaseline = "middle";
+  const corto = nombre.replace(/^(Ing\.|Arq\.)\s*/, ""); g.fillText(corto, 14, 66);
+  g.strokeStyle = "#1d2f6f"; g.lineWidth = 2.5; g.beginPath(); g.moveTo(10, 108); g.bezierCurveTo(120, 88, 260, 128, 400, 96); g.stroke();
+  return c.toDataURL("image/png");
 }
 
 // ---------- Fotos ----------
@@ -1133,6 +1177,7 @@ document.addEventListener("change", async e => {
     for (const f of files) { const ph = await leerFoto(f); if (ph) { if (pos) Object.assign(ph, pos); r.fotos.push(ph); } }
     guardar(); render(); toast(`${files.length} foto${files.length > 1 ? "s" : ""} agregada${files.length > 1 ? "s" : ""}`);
   }
+  if (t.dataset.rubrica && t.files && t.files[0]) { const rb = await leerRubrica(t.files[0]); const fx = S.proyecto.firmantes.find(x => x.id === t.dataset.rubrica); if (rb && fx && !apertura()) { fx.rubrica = rb; guardar(); render(); toast(`Firma escaneada de ${fx.nombre} guardada`); } else if (!rb) toast("No se pudo leer la imagen."); return; }
   if (t.dataset.logo !== undefined && t.files && t.files[0]) { const ph = await leerFoto(t.files[0]); if (ph) { S.proyecto.logo = ph.src; guardar(); render(); } }
   if (t.dataset.importar !== undefined && t.files && t.files[0]) {
     let d;
@@ -1205,6 +1250,7 @@ document.addEventListener("click", async e => {
     b.disabled = true; b.textContent = "Creando la firma…";
     const k = await crearClave(pin);
     const f = { id: uid(), nombre, doc, mat, cargo, parte, pubJwk: k.pubJwk, huella: k.huella };
+    const rf = $("#nf-rub") && $("#nf-rub").files[0]; if (rf) { const rb = await leerRubrica(rf); if (rb) f.rubrica = rb; }
     S.proyecto.firmantes.push(f); CLAVES[f.id] = k.guardada;
     await Store.set("claves", CLAVES); await Store.set("estado", S); render(); toast(`Firma de ${nombre} creada. Huella ${k.huella}`); return; }
   if (d.delfirm) {
