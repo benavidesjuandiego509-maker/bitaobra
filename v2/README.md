@@ -9,6 +9,8 @@ Aplicación web instalable (PWA) para llevar el diario de obra (bitácora) en el
 | Bitácora | Todas las notas firmadas en orden, su estado de enterado, la verificación de integridad, el PDF de la bitácora y la copia JSON para verificar. |
 | Proyecto | Datos del contrato, firmantes (con cédula, matrícula profesional y huella de su clave), nota de apertura y respaldo. |
 
+Cada pestaña abre con una portada que resume el contexto (contrato, día de obra, notas firmadas y notas sin enterado). El PDF de la bitácora completa lleva una portada con los datos del contrato, los firmantes autorizados y el hash de la última nota.
+
 ## Firma electrónica
 
 - Cada firmante crea en el teléfono una clave ECDSA P-256. La clave privada queda cifrada con su PIN (PBKDF2 con 150 000 iteraciones y AES-GCM) y nunca sale del dispositivo; la copia JSON solo lleva claves públicas.

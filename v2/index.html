@@ -292,6 +292,73 @@ textarea.inp { min-height: 76px; resize: vertical; line-height: 1.45; }
   @keyframes up { from { transform: translateY(18px); opacity: .6; } to { transform: none; opacity: 1; } }
   .ring circle.prog { transition: stroke-dashoffset .35s ease; }
 }
+
+/* ---------- Portadas de sección: banda de plano con cuadrícula ---------- */
+body { background: radial-gradient(1100px 420px at 50% -120px, var(--accent-soft), transparent 70%) no-repeat, var(--bg); }
+.top { box-shadow: 0 4px 18px rgba(10, 22, 36, .2); }
+.hero { position: relative; overflow: hidden; isolation: isolate; color: #fff; border-radius: 20px; padding: 20px 20px 18px; display: grid; gap: 16px;
+  background: linear-gradient(135deg, var(--band-1) 0%, var(--band-2) 72%, #0c2748 100%);
+  box-shadow: 0 12px 32px rgba(20, 58, 108, .3), inset 0 1px 0 rgba(255, 255, 255, .16); }
+.hero::before { content: ""; position: absolute; inset: 0; z-index: -1;
+  background-image: linear-gradient(rgba(255,255,255,.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.08) 1px, transparent 1px);
+  background-size: 22px 22px; -webkit-mask-image: linear-gradient(115deg, transparent 15%, #000 100%); mask-image: linear-gradient(115deg, transparent 15%, #000 100%); }
+.hero::after { content: ""; position: absolute; z-index: -1; right: -70px; top: -90px; width: 280px; height: 280px; border-radius: 50%; background: radial-gradient(closest-side, rgba(255,255,255,.24), transparent); }
+.hero-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.hero-txt { min-width: 0; }
+.hero-side { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; flex: none; }
+.hero-ico { width: 48px; height: 48px; border-radius: 14px; background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.22); display: grid; place-items: center; }
+.hero-ico svg { width: 25px; height: 25px; }
+.hero .eyebrow { color: rgba(255,255,255,.8); }
+.hero h1 { font-size: clamp(28px, 6.4vw, 38px); font-weight: 800; font-variation-settings: "wdth" 82; letter-spacing: -.01em; margin-top: 3px; }
+.hero-sub { font-size: 14px; color: rgba(255,255,255,.84); margin: 6px 0 0; max-width: 62ch; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.hero-chips { display: grid; grid-template-columns: repeat(auto-fit, minmax(92px, 1fr)); gap: 8px; }
+@media (min-width: 700px) { .hero { padding: 26px 28px 24px; } .hero-chips { display: flex; flex-wrap: wrap; } .hero-chip { min-width: 130px; } }
+.hero-chip { background: rgba(255,255,255,.13); border: 1px solid rgba(255,255,255,.2); border-radius: 12px; padding: 7px 12px 8px; font-size: 12.5px; line-height: 1.25; color: rgba(255,255,255,.88); }
+.hero-chip b { display: block; font-family: var(--f-display); font-size: 20px; font-weight: 800; color: #fff; font-variation-settings: "wdth" 82; font-variant-numeric: tabular-nums; }
+.hero-chip.warn { border-color: #f0be55; } .hero-chip.warn b { color: #ffd98a; }
+.hero .pill { background: rgba(255,255,255,.18); color: #fff; border: 1px solid rgba(255,255,255,.24); }
+.hero .btn.ghost { color: #fff; min-height: 28px; }
+
+/* Relieve: botones, tarjetas y estados vacíos */
+.card { box-shadow: 0 1px 2px rgba(20, 34, 50, .05), 0 8px 26px rgba(20, 34, 50, .08); }
+.btn.primary { background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 86%, #fff), var(--accent)); box-shadow: 0 2px 10px color-mix(in srgb, var(--accent) 38%, transparent); }
+.sec-h h3 { display: flex; align-items: center; gap: 9px; }
+.sec-h h3::before { content: ""; width: 4px; height: 18px; border-radius: 3px; background: var(--accent); flex: none; }
+.type { position: relative; overflow: hidden; }
+.type::after { content: "→"; position: absolute; right: 14px; top: 14px; color: var(--muted); font-weight: 700; opacity: .55; }
+.type[data-nueva="observacion"] .type-ico { background: var(--signal-soft); color: var(--signal); }
+.type[data-nueva="respuesta"] .type-ico, .type[data-nueva="determinacion"] .type-ico { background: var(--ok-soft); color: var(--ok); }
+.empty-ico { width: 58px; height: 58px; border-radius: 18px; margin: 0 auto 12px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); }
+.empty-ico svg { width: 28px; height: 28px; }
+.empty p { margin: 0 0 12px; }
+.entry { position: relative; }
+.entry::before { content: ""; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 0 3px 3px 0; background: var(--accent); transform: scaleY(0); transition: transform .18s ease; }
+.entry:hover::before, .entry:focus-visible::before { transform: scaleY(1); }
+@media (max-width: 899px) {
+  .nav { background: color-mix(in srgb, var(--paper) 86%, transparent); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: 0 -6px 22px rgba(10, 22, 36, .08); }
+}
+
+/* Fluidez: entrada de cada vista, respuesta al toque y aparición de avisos */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes toastIn { from { opacity: 0; transform: translate(-50%, 12px); } to { opacity: 1; transform: translate(-50%, 0); } }
+  main.enter > * { animation: rise .42s cubic-bezier(.2, .8, .2, 1) backwards; }
+  main.enter > *:nth-child(2) { animation-delay: .05s; } main.enter > *:nth-child(3) { animation-delay: .1s; }
+  main.enter > *:nth-child(4) { animation-delay: .15s; } main.enter > *:nth-child(n+5) { animation-delay: .2s; }
+  .btn, .type, .filters button, .icon-btn, .miss, .close { transition: transform .12s ease, box-shadow .2s ease, border-color .2s ease, background-color .2s ease, color .2s ease, filter .2s ease; }
+  .btn:active, .type:active, .filters button:active, .icon-btn:active, .miss:active { transform: scale(.96); }
+  .type:hover { transform: translateY(-2px); box-shadow: 0 2px 4px rgba(20, 34, 50, .06), 0 14px 32px rgba(20, 34, 50, .13); }
+  .nav button { transition: color .2s ease; }
+  .nav-ico { transition: background-color .25s ease, transform .25s cubic-bezier(.2, .8, .2, 1); }
+  .nav button[aria-current="page"] .nav-ico { transform: scale(1.08); }
+  .nav button:active .nav-ico { transform: scale(.92); }
+  .inp { transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease; }
+  .overlay { animation: fade .2s ease-out; }
+  .toast { animation: toastIn .28s cubic-bezier(.2, .8, .2, 1); }
+  .verif { animation: rise .3s ease-out backwards; }
+  .crit span, .pill { transition: background-color .25s ease, color .25s ease, border-color .25s ease; }
+}
 </style>
 
 </head>
@@ -788,16 +855,37 @@ function entradaHtml(r) {
     <div class="entry-r">${e.total ? pillPct(e.pct) : ""}${estadoPill(r)}</div></button>`;
 }
 function noAbierta() {
-  return `<div class="card pad empty"><p style="margin:0 0 10px"><b>La bitácora aún no está abierta.</b> Registre a los firmantes en Proyecto y firme la nota de apertura.</p><button class="btn primary" data-view="proyecto">Ir a Proyecto</button></div>`;
+  return vacio(I.key, `<p><b>La bitácora aún no está abierta.</b><br>Registre a los firmantes en Proyecto y firme la nota de apertura.</p><button class="btn primary" data-view="proyecto">Ir a Proyecto</button>`);
 }
 
 // ---------- Vistas ----------
+// Portada de cada sección: banda azul con cuadrícula de plano, título, contexto y cifras.
+const HICO = {
+  hoy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
+  notas: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/></svg>',
+  bitacora: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h6a2 2 0 0 1 2 2v14a2 2 0 0 0-2-2H4z"/><path d="M20 4h-6a2 2 0 0 0-2 2v14a2 2 0 0 1 2-2h6z"/></svg>',
+  proyecto: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V9l7-5 7 5v12"/><path d="M10 21v-6h4v6"/></svg>'
+};
+function hero(o) {
+  const chips = (o.chips || []).filter(Boolean).map(c => `<div class="hero-chip${c[2] ? " warn" : ""}"><b>${esc(String(c[0]))}</b>${esc(c[1])}</div>`).join("");
+  return `<header class="hero"><div class="hero-top"><div class="hero-txt">${o.back ? `<button class="btn small ghost" data-volver style="padding-left:0">← Notas</button>` : `<div class="eyebrow">${esc(o.eyebrow || "")}</div>`}<h1>${esc(o.title)}</h1>${o.sub ? `<p class="hero-sub">${esc(o.sub)}</p>` : ""}</div>
+    <div class="hero-side"><div class="hero-ico" aria-hidden="true">${HICO[o.ico] || HICO.notas}</div>${o.right || ""}</div></div>${chips ? `<div class="hero-chips">${chips}</div>` : ""}</header>`;
+}
+function diaDeObra() {
+  const p = S.proyecto; if (!has(p.fechaInicio)) return null;
+  const n = Math.floor((new Date(hoyISO() + "T12:00:00") - new Date(p.fechaInicio + "T12:00:00")) / 86400000) + 1;
+  return n >= 1 ? [n, has(p.plazo) ? `día de ${p.plazo} de plazo` : "día de obra"] : null;
+}
+const vacio = (ico, html) => `<div class="card pad empty"><div class="empty-ico">${ico}</div>${html}</div>`;
 function vistaHoy() {
-  const h = r => `<div class="page-head"><div><div class="eyebrow">${fLarga(hoyISO())}</div><h1>Registro diario</h1></div>${r ? (r.estado === "firmada" ? `<span class="pill accent">Nota N.º ${pad(r.n)}</span>` : `<span class="pill idle">Borrador</span>`) : ""}</div>`;
+  const h = r => { const np = pendientes().length; return hero({ ico: "hoy", eyebrow: fLarga(hoyISO()), title: "Registro diario",
+    sub: has(S.proyecto.contrato) ? `Contrato ${S.proyecto.contrato}${has(S.proyecto.lugar) ? ` · ${S.proyecto.lugar}` : ""}` : "Diario de obra de la interventoría",
+    right: r ? (r.estado === "firmada" ? `<span class="pill">Nota N.º ${pad(r.n)}</span>` : `<span class="pill">Borrador</span>`) : "",
+    chips: apertura() ? [diaDeObra(), [firmadas().length, "notas firmadas"], [np, "sin enterado", np > 0]] : [] }); };
   if (!apertura()) return h() + noAbierta();
-  if (cerrada()) return h() + `<div class="card pad empty">La bitácora está cerrada. Puede consultarla y verificarla en la pestaña Bitácora.</div>`;
+  if (cerrada()) return h() + vacio(I.lock, `<p>La bitácora está cerrada. Puede consultarla y verificarla en la pestaña Bitácora.</p><button class="btn" data-view="bitacora">Ir a la bitácora</button>`);
   const r = diariaDeHoy();
-  if (!r) return h() + `<div class="card empty"><p>Aún no ha empezado el registro de hoy.</p><button class="btn primary" data-nueva="diaria">${I.plus}Empezar el registro de hoy</button></div>`;
+  if (!r) return h() + vacio(I.pen, `<p><b>Aún no ha empezado el registro de hoy.</b><br>El formulario lo guía por los 11 contenidos mínimos de la jornada.</p><button class="btn primary" data-nueva="diaria">${I.plus}Empezar el registro de hoy</button>`);
   if (r.estado === "firmada") return h(r) + `<div class="card pad"><p style="margin:0 0 10px">El registro de hoy ya está firmado como nota N.º ${pad(r.n)}.</p><div class="row"><button class="btn primary" data-abrir="${r.id}">Ver la nota</button><button class="btn" data-nueva="diaria">${I.plus}Otro registro de hoy</button></div></div>`;
   const pend = pendientes();
   return h(r) + `<div class="today-grid"><div class="card pad g-meter" id="meter-box">${meterHtml(r)}</div><div class="g-ed">${editorHtml(r)}</div>
@@ -810,7 +898,9 @@ function vistaHoy() {
 }
 function vistaNotas() {
   if (ui.abierto) { const r = nota(ui.abierto); if (r && r.estado === "borrador") return vistaBorrador(r); ui.abierto = null; }
-  const head = `<div class="page-head"><div><div class="eyebrow">Comunicaciones entre las partes</div><h1>Notas</h1></div></div>`;
+  const nb = S.notas.filter(r => r.estado === "borrador" && r.clase !== "apertura").length, npd = pendientes().length;
+  const head = hero({ ico: "notas", eyebrow: "Comunicaciones entre las partes", title: "Notas", sub: "Instrucciones, observaciones, determinaciones, solicitudes y respuestas, cada una firmada y con su plazo.",
+    chips: apertura() ? [[npd, "pendientes de enterado", npd > 0], [nb, nb === 1 ? "borrador" : "borradores"]] : [] });
   if (!apertura()) return head + noAbierta();
   const borr = S.notas.filter(r => r.estado === "borrador" && r.clase !== "apertura" && !(r.clase === "diaria" && r.datos.fecha === hoyISO()));
   const pend = pendientes();
@@ -821,7 +911,7 @@ function vistaNotas() {
     ${fin ? "" : `<div class="card pad row" style="justify-content:space-between"><div><b>Cerrar la bitácora</b><div class="note">Al terminar la obra. Después no se asientan más notas.</div></div><button class="btn" data-nueva="cierre">${I.t.cierre}Nota de cierre</button></div>`}`;
 }
 function vistaBorrador(r) {
-  return `<div class="page-head"><div><button class="btn small ghost" data-volver style="padding-left:0">← Notas</button><h1>${esc(CLASES[r.clase].nombre)}</h1></div><span class="pill idle">Borrador</span></div>
+  return hero({ ico: "notas", back: true, title: CLASES[r.clase].nombre, sub: CLASES[r.clase].desc, right: `<span class="pill">Borrador</span>` }) + `
     <div class="today-grid"><div class="card pad g-meter" id="meter-box">${meterHtml(r)}</div><div class="g-ed">${editorHtml(r)}</div></div>`;
 }
 function vistaBitacora() {
@@ -832,10 +922,9 @@ function vistaBitacora() {
   const fil = ui.filtro;
   const lst = S.notas.filter(r => r.estado === "firmada" && (fil === "todos" || (fil === "diaria" ? r.clase === "diaria" : fil === "com" ? COMUNICACIONES.includes(r.clase) : fil === "pend" ? (estadoEnterado(r) || {}).k === "pend" : true))).sort((a, b) => b.n - a.n);
   const fb = (k, t) => `<button data-filtro="${k}" aria-pressed="${fil === k}">${t}</button>`;
-  return `<div class="page-head"><div><div class="eyebrow">Contrato ${esc(S.proyecto.contrato || "—")}</div><h1>Bitácora</h1></div>${cerrada() ? `<span class="pill idle">${I.lock}Cerrada</span>` : ""}</div>
-    <div class="stats"><div class="card stat"><b class="mono">${fs.length}</b><span>notas firmadas</span></div>
-      <div class="card stat"><b class="mono" style="color:${pend ? "var(--signal)" : "var(--ok)"}">${pend}</b><span>sin firma de enterado</span></div>
-      <div class="card stat"><b class="mono">${prom} %</b><span>completitud de los registros diarios</span></div></div>
+  return hero({ ico: "bitacora", eyebrow: `Contrato ${S.proyecto.contrato || "—"}`, title: "Bitácora", sub: S.proyecto.objeto || "Todas las notas firmadas, en orden y encadenadas.",
+      right: cerrada() ? `<span class="pill">${I.lock}Cerrada</span>` : "",
+      chips: [[fs.length, "notas firmadas"], [pend, "sin firma de enterado", pend > 0], [`${prom} %`, "completitud de los registros diarios"]] }) + `
     <div class="card pad verif-card"><div class="row" style="justify-content:space-between"><div><div class="eyebrow">Integridad</div><b>¿Alguien cambió, quitó o reordenó una nota?</b><div class="note">Recalcula la cadena de hashes y comprueba cada firma con las claves registradas en la nota de apertura.</div></div>
       <div class="row"><button class="btn primary" data-verificar>${I.shield}Verificar la bitácora</button>${S.proyecto.demo ? `<button class="btn" data-simular>Simular una alteración</button>` : ""}</div></div><div id="verif"></div></div>
     <div class="row" style="justify-content:space-between"><div class="filters">${fb("todos", "Todas")}${fb("diaria", "Registros diarios")}${fb("com", "Órdenes y respuestas")}${fb("pend", "Sin enterado")}</div>
@@ -851,7 +940,9 @@ function vistaProyecto() {
   const f = (k, l, ty = "text", ph = "") => `<div class="field"><label for="p-${k}">${l}</label><input class="inp" id="p-${k}" data-pp="${k}" type="${ty}" value="${esc(p[k] || "")}"${ph ? ` placeholder="${esc(ph)}"` : ""}${ty === "number" ? ' inputmode="numeric"' : ""}></div>`;
   const firm = (p.firmantes || []).map(x => `<div class="signer"><div class="signer-ico">${I.key}</div><div style="min-width:0"><b>${esc(x.nombre)}</b> <span class="muted">· ${esc(x.cargo)} · ${esc(x.parte)}</span><div class="mono note">C.C. ${esc(x.doc || "—")}${has(x.mat) ? ` · M.P. ${esc(x.mat)}` : ""} · Huella ${esc(x.huella)}${CLAVES[x.id] ? "" : " · su clave no está en este dispositivo"}</div></div>${ap ? "" : `<button class="del" data-delfirm="${x.id}" aria-label="Quitar firmante">${I.x}</button>`}${x.rubrica || !ap ? `<div class="rub-row">${x.rubrica ? `<img class="rub" src="${x.rubrica}" alt="Firma escaneada de ${esc(x.nombre)}">` : `<span class="note">Sin firma escaneada</span>`}${ap ? "" : `<label class="btn small file-lbl">${x.rubrica ? "Cambiar firma escaneada" : "Subir firma escaneada"}<input type="file" accept="image/*" data-rubrica="${x.id}"></label>`}</div>` : ""}</div>`).join("");
   const cfg = p.cfg || {};
-  return `<div class="page-head"><div><div class="eyebrow">Contrato, firmantes y apertura</div><h1>Proyecto</h1></div></div>
+  return hero({ ico: "proyecto", eyebrow: "Contrato, firmantes y apertura", title: has(p.contrato) ? p.contrato : "Proyecto", sub: [p.entidad, p.lugar].filter(has).join(" · ") || "Llene el contrato, registre a los firmantes y abra la bitácora.",
+      right: `<span class="pill">${ap ? "Bitácora abierta" : "Sin abrir"}</span>`,
+      chips: [[(p.firmantes || []).length, "firmantes"], diaDeObra()] }) + `
     ${p.demo ? `<div class="card pad" style="border-color:var(--signal)"><b>Está viendo un contrato de ejemplo.</b> Los nombres son ficticios. El PIN de los tres firmantes es <span class="mono">${PIN_EJEMPLO}</span>. <div class="row" style="margin-top:8px"><button class="btn small primary" data-limpiar>Empezar mi proyecto</button></div></div>` : ""}
     <div class="card pad" style="display:grid;gap:14px"><div class="eyebrow">Contrato</div>
       ${ap ? `<p class="note" style="margin:0">Estos datos quedaron fijados en la nota de apertura N.º ${pad(ap.n)}; si cambia algo aquí, la nota no cambia.</p>` : ""}
@@ -883,6 +974,8 @@ function render() {
   $("#hdr-sub").textContent = S.proyecto.contrato ? `${S.proyecto.contrato} · ${S.proyecto.contratista || ""}` : "Bitácora electrónica de obra";
   $("#hdr-demo").hidden = !S.proyecto.demo;
   m.innerHTML = ui.view === "hoy" ? vistaHoy() : ui.view === "notas" ? vistaNotas() : ui.view === "bitacora" ? vistaBitacora() : vistaProyecto();
+  const clave = ui.view + "|" + (ui.view === "notas" ? ui.abierto || "" : "");
+  if (clave !== ui.vista) { ui.vista = clave; m.classList.remove("enter"); void m.offsetWidth; m.classList.add("enter"); }
 }
 function refrescarMedidor(r) {
   const b = $("#meter-box"); if (b) b.innerHTML = meterHtml(r);
@@ -970,8 +1063,47 @@ async function generarPDF(notas, nombre) {
     y += 24; doc.setDrawColor(29, 79, 145); doc.setLineWidth(.6); doc.line(M, y, W - M, y); y += 8;
   };
   const salto = alto => { if (y + alto > 258) { doc.addPage(); y = 20; } };
+  // Portada: solo en el PDF de la bitácora completa.
+  const conPortada = notas.length > 1;
+  if (conPortada) {
+    const H = 104;
+    doc.setFillColor(29, 79, 145); doc.rect(0, 0, W, H, "F");
+    doc.setDrawColor(52, 100, 164); doc.setLineWidth(.15);
+    for (let x = 0; x <= W; x += 8) doc.line(x, 0, x, H);
+    for (let yy = 0; yy <= H; yy += 8) doc.line(0, yy, W, yy);
+    doc.setFillColor(20, 58, 108); doc.rect(0, H, W, 5, "F");
+    doc.setFillColor(183, 121, 0); doc.rect(M, H, 46, 5, "F");
+    if (p.logo) { try { doc.setFillColor(255, 255, 255); doc.roundedRect(W - M - 30, 16, 30, 30, 3, 3, "F"); doc.addImage(p.logo, W - M - 27, 19, 24, 24, undefined, "FAST"); } catch (e) {} }
+    doc.setTextColor(255); doc.setFont("helvetica", "bold"); doc.setFontSize(10.5);
+    doc.text("BITÁCORA ELECTRÓNICA DE OBRA", M, 50, { charSpace: .8 });
+    doc.setFontSize(30); doc.text(doc.splitTextToSize(`Contrato ${p.contrato || "—"}`, W - 2 * M).slice(0, 1), M, 66);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(13); doc.text(doc.splitTextToSize(p.interventoria || "Interventoría", W - 2 * M).slice(0, 1), M, 76);
+    doc.setFontSize(9); doc.setTextColor(214, 226, 242);
+    doc.text("Diario de obra · Manual de Interventoría Obra Pública del INVIAS (2022), numeral 8.4, ítem 8", M, 92);
+    y = H + 22;
+    const dato = (l, v, lineas = 1) => {
+      doc.setFont("helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(110); doc.text(l.toUpperCase(), M, y, { charSpace: .4 });
+      doc.setFont("helvetica", "normal"); doc.setFontSize(11); doc.setTextColor(20);
+      const ls = doc.splitTextToSize(String(v || "—"), W - 2 * M - 46).slice(0, lineas); doc.text(ls, M + 46, y); y += 5.2 * ls.length + 3.5;
+    };
+    dato("Entidad", p.entidad); dato("Contratista", p.contratista); dato("Interventoría", p.interventoria); dato("Objeto", p.objeto, 4);
+    dato("Lugar", p.lugar); dato("Inicio y plazo", `${has(p.fechaInicio) ? fLarga(p.fechaInicio) : "—"}${has(p.plazo) ? ` · ${p.plazo} días calendario` : ""}`);
+    const a = notas[0], z = notas[notas.length - 1];
+    dato("Contenido", `${notas.length} notas firmadas, de la N.º ${pad(a.n)} (${fCorta(a.datos.fecha)}) a la N.º ${pad(z.n)} (${fCorta(z.datos.fecha)})`, 2);
+    y += 3; doc.setDrawColor(29, 79, 145); doc.setLineWidth(.5); doc.line(M, y, W - M, y); y += 8;
+    doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(29, 79, 145); doc.text("Firmantes autorizados", M, y); y += 6;
+    autorizados().slice(0, 8).forEach(f => {
+      doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.setTextColor(20); doc.text(doc.splitTextToSize(`${f.nombre} · ${f.cargo}, ${String(f.parte || "").toLowerCase()}`, W - 2 * M).slice(0, 1), M, y);
+      doc.setFont("courier", "normal"); doc.setFontSize(8.5); doc.setTextColor(90); doc.text(`C.C. ${f.doc || "-"}${has(f.mat) ? `  M.P. ${f.mat}` : ""}  Huella ${f.huella || "-"}`, M, y + 4.2); y += 10.5;
+    });
+    if (z.sello && z.sello.hash) {
+      y = Math.max(y + 2, 240); doc.setFillColor(244, 246, 248); doc.roundedRect(M, y - 5, W - 2 * M, 15, 2, 2, "F");
+      doc.setFont("helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(110); doc.text("HASH DE LA ÚLTIMA NOTA (SHA-256)", M + 4, y, { charSpace: .4 });
+      doc.setFont("courier", "normal"); doc.setFontSize(8.5); doc.setTextColor(20); doc.text(z.sello.hash, M + 4, y + 5.5);
+    }
+  }
   notas.forEach((r, k) => {
-    if (k) doc.addPage();
+    if (k || conPortada) doc.addPage();
     encabezado();
     doc.setFont("helvetica", "bold"); doc.setFontSize(14); doc.setTextColor(29, 79, 145);
     doc.text(`${CLASES[r.clase].nombre} · ${r.n ? "Nota N.º " + pad(r.n) : "Borrador"}`, M, y); y += 6;
